@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GenesisAndroid</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_genesis_web_view">GenesisWebViewActivity</string>
+</resources>
