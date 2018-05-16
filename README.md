@@ -1,5 +1,8 @@
 # Genesis Android SDK
 
+[![Build Status](https://img.shields.io/travis/GenesisGateway/android_sdk.svg?style=flat)](https://travis-ci.org/GenesisGateway/android_sdk)
+[![Software License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](LICENSE)
+
 ## Table of Contents
 - [Requirements](#requirements)
 - [Installation and Setup](#installation-and-setup)
@@ -28,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation project(':GenesisAndroid:sdk')
+  implementation 'com.emerchantpay.gateway:genesis-android:1.0.1'
 }
 ```
 

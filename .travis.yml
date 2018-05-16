@@ -1,0 +1,25 @@
+language: android
+
+jdk: oraclejdk8
+
+sudo: true
+
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-27.0.3
+    - android-27
+    - extra-google-m2repository
+  licenses:
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
+
+before_install: 
+  - yes | sdkmanager "platforms;android-27"
+
+script: 
+    - ./gradlew --stacktrace lint test :GenesisAndroid:assembleDebug :GenesisAndroid:assembleRelease  
+
+after_success: ./script/deploy_snapshot.sh
