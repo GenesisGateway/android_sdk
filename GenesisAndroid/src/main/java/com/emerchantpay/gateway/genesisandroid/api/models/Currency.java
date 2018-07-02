@@ -3,7 +3,6 @@ package com.emerchantpay.gateway.genesisandroid.api.models;
 import android.util.Log;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
@@ -16,8 +15,8 @@ public class Currency {
     private Integer exponent;
     private BigDecimal convertedAmount;
 
-    private HashMap<String, Integer> currenciesMap = new HashMap<String, Integer>();
-    private ArrayList<String> currencyList = new ArrayList<String>();
+    private static HashMap<String, Integer> currenciesMap = new HashMap<String, Integer>();
+    private static ArrayList<String> currencyList = new ArrayList<String>();
 
     public Currency() {
         super();
@@ -26,6 +25,9 @@ public class Currency {
     public Currency(String currency, Integer exponent) {
         this.currency = currency;
         this.exponent = exponent;
+
+        currenciesMap.put(currency, exponent);
+        currencyList.add(currency);
     }
 
     public static Currency USD = new Currency("USD", 2);
@@ -123,17 +125,6 @@ public class Currency {
 
     // Get Currencies
     public ArrayList<String> getCurrencies() throws IllegalAccessException {
-
-        Field[] fields = this.getClass().getDeclaredFields();
-
-        for (Field f: fields) {
-            if (Modifier.isStatic(f.getModifiers())) {
-                currenciesMap.put(((Currency) f.get(this)).getCurrency(),
-                        ((Currency) f.get(this)).getExponent());
-                currencyList.add(((Currency) f.get(this)).getCurrency());
-            }
-        }
-
         // Sort Currencies
         Collections.sort(currencyList);
 

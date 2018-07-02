@@ -1,10 +1,11 @@
-package com.emerchantpay.gateway.genesisandroid.internal;
+package com.emerchantpay.gateway.genesisandroid.validation;
 
 import android.content.Context;
 import android.test.mock.MockContext;
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages;
-import com.emerchantpay.gateway.genesisandroid.api.internal.GenesisValidator;
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest;
+import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator;
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest;
 import com.emerchantpay.gateway.genesisandroid.api.models.Country;
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency;
@@ -16,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -41,7 +41,7 @@ public class GenesisValidatorUnitTest {
     private PaymentAddress billingAddress;
 
     // Transaction types
-    private ArrayList<String> transactionTypes;
+    private TransactionTypesRequest transactionTypes;
 
     // Parameters
     private String transactionId;
@@ -69,13 +69,13 @@ public class GenesisValidatorUnitTest {
 
         // Address
         billingAddress = new PaymentAddress("John", "Doe",
-                "address1", "","10000", "New York",
+                "address1", "", "10000", "New York",
                 "state", new Country().getCountry("United States"));
 
         // Transaction types list
-        transactionTypes = new ArrayList<String>();
-        transactionTypes.add(WPFTransactionTypes.authorize);
-        transactionTypes.add(WPFTransactionTypes.ezeewallet);
+        transactionTypes = new TransactionTypesRequest();
+        transactionTypes.addTransaction(WPFTransactionTypes.authorize);
+        transactionTypes.addTransaction(WPFTransactionTypes.ezeewallet);
 
         // Payment request
         request = new PaymentRequest(context, transactionId, amount, Currency.USD,
@@ -203,6 +203,6 @@ public class GenesisValidatorUnitTest {
 
     @Test
     public void testIsValidData() {
-        assertTrue(validator.isValidData());
+        assertTrue(validator.isValidRequest(request));
     }
 }

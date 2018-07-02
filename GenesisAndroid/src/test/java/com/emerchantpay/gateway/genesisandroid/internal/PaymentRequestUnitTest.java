@@ -4,6 +4,7 @@ import android.content.Context;
 import android.test.mock.MockContext;
 
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest;
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest;
 import com.emerchantpay.gateway.genesisandroid.api.models.Country;
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency;
 import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress;
@@ -28,7 +29,7 @@ public class PaymentRequestUnitTest {
     private PaymentRequest request;
     private PaymentAddress address;
 
-    private ArrayList<String> transactionTypes;
+    private TransactionTypesRequest transactionTypes;
 
     @Before
     public void mockParams() throws IllegalAccessException, MalformedURLException {
@@ -45,15 +46,14 @@ public class PaymentRequestUnitTest {
 
         // Transaction types
         // Create Transaction types
-        transactionTypes = new ArrayList<String>();
-        transactionTypes.add(WPFTransactionTypes.sale);
+        transactionTypes = new TransactionTypesRequest();
+        transactionTypes.addTransaction(WPFTransactionTypes.sale);
 
         // Payment request
         request = new PaymentRequest(context, uniqueId,
                 new BigDecimal("2.00"), Currency.USD,
                 "john@example.com", "+55555555", address,
                 "https://example.com", transactionTypes);
-
     }
 
     @Test
@@ -80,9 +80,7 @@ public class PaymentRequestUnitTest {
 
     @Test
     public void testLoadTransactionTypes() throws IllegalAccessException {
-        request.loadTransactionTypes(transactionTypes);
-
-        assertEquals(transactionTypes.get(0), "sale");
+        assertTrue(transactionTypes.getTransactionTypesList().contains("sale"));
     }
 
     @Test

@@ -15,8 +15,6 @@ import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError;
 import com.emerchantpay.gateway.genesisandroid.api.ui.GenesisWebViewActivity;
 import com.emerchantpay.gateway.genesisandroid.api.util.Configuration;
 
-import java.net.MalformedURLException;
-
 public class Genesis {
 
     // Application context

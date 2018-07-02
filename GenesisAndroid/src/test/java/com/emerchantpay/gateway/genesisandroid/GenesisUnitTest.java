@@ -4,7 +4,7 @@ import android.content.Context;
 import android.test.mock.MockContext;
 
 import com.emerchantpay.gateway.genesisandroid.api.internal.Genesis;
-import com.emerchantpay.gateway.genesisandroid.api.internal.GenesisValidator;
+import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator;
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest;
 import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response;
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError;

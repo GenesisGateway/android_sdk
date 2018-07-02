@@ -3,6 +3,7 @@ package com.emerchantpay.gateway.genesisandroid.api.internal.request;
 import android.content.Context;
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants;
+import com.emerchantpay.gateway.genesisandroid.api.constants.TransactionTypes;
 import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants;
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.BaseAttributes;
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.RiskParamsAttributes;
@@ -10,26 +11,32 @@ import com.emerchantpay.gateway.genesisandroid.api.interfaces.customerinfo.Custo
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.AsyncAttributes;
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.DescriptorAttributes;
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.PaymentAttributes;
-import com.emerchantpay.gateway.genesisandroid.api.internal.GenesisValidator;
+import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator;
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency;
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError;
 import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress;
 import com.emerchantpay.gateway.genesisandroid.api.models.RiskParams;
+import com.emerchantpay.gateway.genesisandroid.api.models.klarna.KlarnaItem;
 import com.emerchantpay.gateway.genesisandroid.api.util.GenesisSharedPreferences;
 import com.emerchantpay.gateway.genesisandroid.api.util.Request;
 import com.emerchantpay.gateway.genesisandroid.api.util.RequestBuilder;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 
 public class PaymentRequest extends Request implements PaymentAttributes, CustomerInfoAttributes,
         DescriptorAttributes, AsyncAttributes, RiskParamsAttributes {
+
+    // Request Builder
+    private RequestBuilder requestBuilder;
 
     // Application context
     private Context context;
 
     private String transactionId;
     private String currency;
+    private Integer exponent;
     private BigDecimal amount;
     private String description;
     private String notificationUrl;
@@ -38,6 +45,8 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
     private String customerEmail;
     private String customerPhone;
     private Integer lifetime;
+    private String customerGender;
+    private BigDecimal orderTaxAmount;
 
     // Payment Addresses
     private PaymentAddress billingAddress;
@@ -48,6 +57,9 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
 
     // Risk params
     private RiskParams riskParams;
+
+    // Klarna items
+    private KlarnaItemsRequest klarnaItemsRequest;
 
     // Error handler
     private GenesisError error;
@@ -60,30 +72,33 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
 
     public PaymentRequest(Context context, String transactionId, BigDecimal amount, Currency currency, String customerEmail,
                           String customerPhone, PaymentAddress billingAddress, String notificationUrl,
-                          ArrayList<String> transactionTypesList) throws IllegalAccessException {
+                          TransactionTypesRequest transactionTypes) throws IllegalAccessException {
+
         super();
 
         this.context = context;
         this.transactionId = transactionId;
         this.amount = amount;
         this.currency = currency.getCurrency();
+        this.exponent = currency.getExponent();
         this.customerEmail = customerEmail;
         this.customerPhone = customerPhone;
         this.billingAddress = billingAddress;
+        this.transactionTypes = transactionTypes;
 
         if (notificationUrl != null && !notificationUrl.isEmpty()) {
             this.notificationUrl = notificationUrl;
-        } else {
-            this.notificationUrl = null;
         }
 
         // Init params
         loadParams();
         setBillingAddress(billingAddress);
-        loadTransactionTypes(transactionTypesList);
 
         // Load shared preferences
         sharedPreferences.loadSharedPreferences(context, this);
+    }
+
+    public PaymentRequest() {
     }
 
     public void setBillingAddress(PaymentAddress address) throws IllegalAccessException {
@@ -98,7 +113,6 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
         setBillingCountry(billingAddress.getCountryName());
     }
 
-
     public void setShippingAddress(PaymentAddress shippingAddress) throws IllegalAccessException {
         // Shipping Payment Address
         setShippingFirstname(shippingAddress.getFirstName());
@@ -111,7 +125,7 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
         setShippingCountry(shippingAddress.getCountryName());
     }
 
-    public void loadParams() throws IllegalAccessException {
+    public void loadParams() {
         setTransactionId(transactionId);
         setAmount(amount);
 
@@ -132,16 +146,6 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
         setReturnSuccessUrl(URLConstants.SUCCESS_URL);
         setReturnFailureUrl(URLConstants.FAILURE_URL);
         setReturnCancelUrl(URLConstants.CANCEL_URL);
-    }
-
-    public void loadTransactionTypes(ArrayList<String> transactionTypesList) throws IllegalAccessException {
-        // Set validator
-        transactionTypes.setValidator(validator);
-
-        // Transaction Types
-        for (String t : transactionTypesList) {
-            addTransactionType(t);
-        }
     }
 
     @Override
@@ -192,6 +196,26 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
         return this;
     }
 
+    public PaymentRequest setCustomerGender(String customerGender) {
+        this.customerGender = customerGender;
+        return this;
+    }
+
+    public PaymentRequest setOrderTaxAmount(BigDecimal orderTaxAmount) {
+
+        if (exponent > 0) {
+            BigDecimal multiplyExp = new BigDecimal(Math.pow(10, exponent), MathContext.DECIMAL64);
+
+            orderTaxAmount = amount.divide(multiplyExp);
+        } else {
+            orderTaxAmount = amount;
+        }
+
+        this.orderTaxAmount = orderTaxAmount;
+
+        return this;
+    }
+
     public PaymentRequest setRiskParams(RiskParams riskParams) {
         // Set params
         setRiskUserId(riskParams.getUserId());
@@ -208,10 +232,12 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
         return this;
     }
 
-    public TransactionTypesRequest addTransactionType(String transactionType) throws IllegalAccessException {
+    public KlarnaItemsRequest addKlarnaItem(KlarnaItem klarnaItem) {
+        return klarnaItemsRequest = new KlarnaItemsRequest(klarnaItem);
+    }
 
-        transactionTypes.addTransaction(transactionType);
-        return transactionTypes;
+    public KlarnaItemsRequest addKlarnaItems(ArrayList<KlarnaItem> klarnaItems) {
+        return klarnaItemsRequest = new KlarnaItemsRequest(klarnaItems);
     }
 
     @Override
@@ -232,7 +258,7 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
     protected RequestBuilder buildRequest(String root) {
 
         if (isValidData()) {
-            return new RequestBuilder(root)
+            requestBuilder = new RequestBuilder(root)
                     .addElement(buildBaseParams().toXML())
                     .addElement(buildPaymentParams().toXML())
                     .addElement(buildCustomerInfoParams().toXML())
@@ -247,6 +273,17 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
                     .addElement("transaction_types", transactionTypes)
                     .addElement("risk_params", buildRiskParams().toXML())
                     .addElement("dynamic_descriptor_params", buildDescriptorParams().toXML());
+
+            if (transactionTypes.getTransactionTypesList().contains(TransactionTypes.KLARNA_AUTHORIZE)) {
+                requestBuilder.addElement("customer_gender", customerGender)
+                        .addElement("order_tax_amount", orderTaxAmount);
+            }
+
+            if (klarnaItemsRequest != null) {
+                requestBuilder.addElement(klarnaItemsRequest.toXML());
+            }
+
+            return requestBuilder;
         } else {
             return new RequestBuilder(root);
         }
@@ -262,14 +299,25 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
 
     public Boolean isValidData() {
         // Validate
-        validator.isValidRequest(this);
         validator.isValidAddress(billingAddress);
 
-        if (validator.isValidData()) {
-            return true;
-        } else {
-            return false;
+        for (String transactionType : transactionTypes.getTransactionTypesList()) {
+            switch (transactionType) {
+                case "klarna_authorize":
+                    if (validator.isValidKlarnaRequest(klarnaItemsRequest, amount, orderTaxAmount)
+                            && validator.isValidRequest(this)) {
+                        return true;
+                    } else return false;
+                default:
+                    if (validator.isValidRequest(this)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+            }
         }
+
+        return null;
     }
 
     public String getTransactionId() {
@@ -298,5 +346,25 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
 
     public GenesisValidator getValidator() {
         return validator;
+    }
+
+    public TransactionTypesRequest getTransactionTypes() {
+        return transactionTypes;
+    }
+
+    public BigDecimal getOrderTaxAmount() {
+        return orderTaxAmount;
+    }
+
+    public String getReturnSuccessUrl() {
+        return URLConstants.SUCCESS_URL;
+    }
+
+    public String getReturnCancelUrl() {
+        return URLConstants.CANCEL_URL;
+    }
+
+    public KlarnaItemsRequest getKlarnaItemsRequest() {
+        return klarnaItemsRequest;
     }
 }

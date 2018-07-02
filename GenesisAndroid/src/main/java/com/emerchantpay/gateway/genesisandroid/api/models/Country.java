@@ -1,7 +1,5 @@
 package com.emerchantpay.gateway.genesisandroid.api.models;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,8 +8,8 @@ public class Country {
     private String code;
     private String name;
 
-    private HashMap<String, String> countriesMap = new HashMap<String, String>();
-    private ArrayList<String> countryNamesList = new ArrayList<String>();
+    private static HashMap<String, String> countriesMap = new HashMap<String, String>();
+    private static ArrayList<String> countryNamesList = new ArrayList<String>();
 
     public Country() {
         super();
@@ -21,6 +19,8 @@ public class Country {
 
         this.code = code;
         this.name = name;
+        countriesMap.put(name, code);
+        countryNamesList.add(name);
     }
 
     public static Country Afganistan = new Country("AF", "Afghanistan");
@@ -118,14 +118,14 @@ public class Country {
     public static Country Guyana = new Country("GY", "Guyana");
     public static Country Haiti = new Country("HT", "Haiti");
     public static Country HeardIslandandMcdonalIslands = new Country("HM", "Heard Island & Mcdonald Islands");
-    public static Country VaticanCity = new Country("VA","Holy See (Vatican City State)");
+    public static Country VaticanCity = new Country("VA", "Holy See (Vatican City State)");
     public static Country Honduras = new Country("'HN", "Honduras");
     public static Country HongKong = new Country("HK", "Hong Kong");
     public static Country Hungary = new Country("HU", "Hungary");
     public static Country Iceland = new Country("IS", "Iceland");
     public static Country India = new Country("IN", "India");
     public static Country Iran = new Country("IR", "Iran, Islamic Republic Of");
-    public static Country Iraq = new Country("IQ","Iraq");
+    public static Country Iraq = new Country("IQ", "Iraq");
     public static Country Ireland = new Country("IE", "Ireland");
     public static Country IsleOfMan = new Country("IM", "Isle of Man");
     public static Country Israel = new Country("IL", "Israel");
@@ -180,7 +180,7 @@ public class Country {
     public static Country Nicaragua = new Country("NI", "Nicaragua");
     public static Country Niger = new Country("NE", "Niger");
     public static Country Nigeria = new Country("NG", "Nigeria");
-    public static Country Niue = new Country("NU","Niue");
+    public static Country Niue = new Country("NU", "Niue");
     public static Country NorfolkIsland = new Country("NF", "Norfolk Island");
     public static Country NorthernMarianaIslands = new Country("MP", "Northern Mariana Islands");
     public static Country Norway = new Country("NO", "Norway");
@@ -214,7 +214,7 @@ public class Country {
     public static Country SaudiArabia = new Country("SA", "Saudi Arabia");
     public static Country Senegal = new Country("SN", "Senegal");
     public static Country Serbia = new Country("RS", "Serbia");
-    public static Country Seychelles = new Country("SC","Seychelles");
+    public static Country Seychelles = new Country("SC", "Seychelles");
     public static Country SierraLeone = new Country("SL", "Sierra Leone");
     public static Country Singapore = new Country("SG", "Singapore");
     public static Country Slovakia = new Country("SK", "Slovakia");
@@ -271,9 +271,7 @@ public class Country {
     }
 
     // Get ISO code
-    public String getIsoCode(String name) throws IllegalAccessException {
-        addCountries();
-
+    public String getIsoCode(String name) {
         return countriesMap.get(name);
     }
 
@@ -281,33 +279,14 @@ public class Country {
         return name;
     }
 
-    public Country getCountry(String country) throws IllegalAccessException {
-
-        addCountries();
-
+    public Country getCountry(String country) {
         String countryCode = countriesMap.get(country);
 
         return new Country(countryCode, country);
     }
 
-    // Add Countries Names and ISO codes
-    protected void addCountries() throws IllegalAccessException {
-
-        Field[] fields = this.getClass().getDeclaredFields();
-
-        for (Field f: fields) {
-            if (Modifier.isStatic(f.getModifiers())) {
-                countriesMap.put(((Country) f.get(this)).getCountryName(),
-                        ((Country) f.get(this)).getCode());
-                countryNamesList.add(((Country) f.get(this)).getCountryName());
-            }
-        }
-    }
-
     // Get Country names list
-    public ArrayList<String> getCountryNames() throws IllegalAccessException {
-        addCountries();
-
+    public ArrayList<String> getCountryNames() {
         return countryNamesList;
     }
 }

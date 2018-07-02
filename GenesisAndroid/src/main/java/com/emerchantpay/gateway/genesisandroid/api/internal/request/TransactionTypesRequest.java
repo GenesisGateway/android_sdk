@@ -1,67 +1,99 @@
 package com.emerchantpay.gateway.genesisandroid.api.internal.request;
 
 
-import com.emerchantpay.gateway.genesisandroid.api.internal.GenesisValidator;
+import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator;
 import com.emerchantpay.gateway.genesisandroid.api.util.Request;
 import com.emerchantpay.gateway.genesisandroid.api.util.RequestBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TransactionTypesRequest extends Request {
 
-	private PaymentRequest parent;
-	private CustomAttributesRequest customAttributes;
-	private ArrayList<CustomAttributesRequest> customAttributesList = new ArrayList<CustomAttributesRequest>();
+    private PaymentRequest parent;
+    private ArrayList<String> transactionTypesList = new ArrayList<String>();
+    private CustomAttributesRequest customAttributes;
+    private ArrayList<CustomAttributesRequest> customAttributesList = new ArrayList<CustomAttributesRequest>();
 
-	// Genesis Validator
-	private GenesisValidator validator;
+    // Genesis Validator
+    private GenesisValidator validator = new GenesisValidator();
 
-	public TransactionTypesRequest() {
-		super();
-	}
+    public TransactionTypesRequest() {
+        super();
+    }
 
-	public void setValidator(GenesisValidator validator) {
-		this.validator = validator;
-	}
+    public TransactionTypesRequest(PaymentRequest parent) {
+        this.parent = parent;
+    }
 
-	public TransactionTypesRequest(PaymentRequest parent) {
-		this.parent = parent;
-	}
+    public TransactionTypesRequest addTransaction(String transactionType) throws IllegalAccessException {
+        // validate transaction type
+        validator.validateTransactionType(transactionType);
 
-	public TransactionTypesRequest addTransaction(String transactionType) throws IllegalAccessException {
-		validator.validateTransactionType(transactionType);
-		customAttributes = new CustomAttributesRequest(this, transactionType);
-		customAttributesList.add(customAttributes);
-		return this;
-	}
+        transactionTypesList.add(transactionType);
 
-	public TransactionTypesRequest addParam(String key, String value) {
-		this.customAttributes.addAttributeKey(key).addAttributeValue(value);
-		return this;
-	}
+        customAttributes = new CustomAttributesRequest(this, transactionType);
+        customAttributesList.add(customAttributes);
 
-	@Override
-	public String toXML() {
-		return buildRequest("transaction_types").toXML();
-	}
+        return this;
+    }
 
-	@Override
-	public String toQueryString(String root) {
-		return buildRequest(root).toQueryString();
-	}
+    public TransactionTypesRequest addTransaction(String transactionType, HashMap<String, String> additionalParams) throws IllegalAccessException {
+        // validate transaction type
+        validator.validateTransactionType(transactionType);
 
-	protected RequestBuilder buildRequest(String root) {
+        transactionTypesList.add(transactionType);
 
-		RequestBuilder builder = new RequestBuilder(root);
+        customAttributes = new CustomAttributesRequest(this, transactionType);
 
-		for (CustomAttributesRequest attribute: customAttributesList) {
-			builder.addElement(null, attribute);
-		}
+        for (String key : additionalParams.keySet()) {
+            customAttributes.addAttribute(key, additionalParams.get(key));
+        }
 
-		return builder;
-	}
+        customAttributesList.add(customAttributes);
 
-	public PaymentRequest done() {
-		return parent;
-	}
+        return this;
+    }
+
+    public TransactionTypesRequest addParam(String key, String value) {
+        this.customAttributes.addAttribute(key, value);
+        return this;
+    }
+
+    @Override
+    public String toXML() {
+        return buildRequest("transaction_types").toXML();
+    }
+
+    @Override
+    public String toQueryString(String root) {
+        return buildRequest(root).toQueryString();
+    }
+
+    protected RequestBuilder buildRequest(String root) {
+
+        RequestBuilder builder = new RequestBuilder(root);
+
+        for (CustomAttributesRequest attribute : customAttributesList) {
+            builder.addElement(null, attribute);
+        }
+
+        return builder;
+    }
+
+    public CustomAttributesRequest getCustomAttributes() {
+        return customAttributes;
+    }
+
+    public ArrayList<CustomAttributesRequest> getCustomAttributesList() {
+        return customAttributesList;
+    }
+
+    public ArrayList<String> getTransactionTypesList() {
+        return transactionTypesList;
+    }
+
+    public PaymentRequest done() {
+        return parent;
+    }
 }

@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.0.1'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.1.0'
 }
 ```
 
@@ -84,6 +84,7 @@ import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages;
 import com.emerchantpay.gateway.genesisandroid.api.constants.Locales;
 import com.emerchantpay.gateway.genesisandroid.api.internal.Genesis;
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest;
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest;
 import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response;
 import com.emerchantpay.gateway.genesisandroid.api.models.Country;
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency;
@@ -93,8 +94,6 @@ import com.emerchantpay.gateway.genesisandroid.api.models.WPFTransactionTypes;
 import com.emerchantpay.gateway.genesisandroid.api.util.Configuration;
 
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class MainActivity extends Activity {
@@ -127,8 +126,8 @@ public class MainActivity extends Activity {
                 "Washington", new Country().UnitedStates);
 
         // Create Transaction types
-        ArrayList<String> transactionTypes = new ArrayList<String>();
-        transactionTypes.add(WPFTransactionTypes.sale);
+        TransactionTypesRequest transactionTypes = new TransactionTypesRequest();
+        transactionTypes.addTransaction(WPFTransactionTypes.sale);
 
         // Init WPF API request
         PaymentRequest paymentRequest = new PaymentRequest(this, uniqueId,
