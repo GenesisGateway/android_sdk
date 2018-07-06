@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.1.0'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.1.1'
 }
 ```
 
@@ -64,7 +64,7 @@ Basic Usage
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.emerchantpay.android.api.ui.GenesisWebViewActivity"/>
+        <activity android:name="com.emerchantpay.gateway.genesisandroid.api.ui.GenesisWebViewActivity"/>
     </application>
 </manifest>
 ```
@@ -77,7 +77,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.emerchantpay.gateway.androidgenesissample.R;
-import com.emerchantpay.gateway.androidgenesissample.handlers.AlertDialogHandler;
+import com.emerchantpay.gateway.genesisandroid.api.ui.AlertDialogHandler;
 import com.emerchantpay.gateway.genesisandroid.api.constants.Endpoints;
 import com.emerchantpay.gateway.genesisandroid.api.constants.Environments;
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages;
