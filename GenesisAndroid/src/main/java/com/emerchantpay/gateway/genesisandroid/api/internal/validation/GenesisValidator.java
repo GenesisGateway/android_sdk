@@ -23,8 +23,6 @@ public class GenesisValidator {
     public static final Pattern VALID_URL_REGEX = Pattern
             .compile("\\b(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 
-    private Boolean isValid;
-
     private ArrayList<String> notValidParamsList = new ArrayList<String>();
     private ArrayList<String> emptyParamsList = new ArrayList<String>();
 
@@ -39,46 +37,42 @@ public class GenesisValidator {
         super();
     }
 
-
     // Validate amount
     public Boolean validateAmount(BigDecimal amount) {
         if (amount.doubleValue() > 0 && amount != null) {
-            isValid = true;
+            return true;
         } else {
-            isValid = false;
             error = new GenesisError(ErrorMessages.INVALID_AMOUNT);
             notValidParamsList.add(amount.toString());
-        }
 
-        return isValid;
+            return false;
+        }
     }
 
     public Boolean validateEmail(String email) {
         Matcher m = VALID_EMAIL_REGEX.matcher(email);
 
         if (m.matches() && email != null && !email.isEmpty()) {
-            isValid = true;
+            return true;
         } else {
-            isValid = false;
             error = new GenesisError(ErrorMessages.INVALID_EMAIL);
             notValidParamsList.add(email);
-        }
 
-        return isValid;
+            return false;
+        }
     }
 
     public Boolean validatePhone(String phone) {
         Matcher m = VALID_PHONE_REGEX.matcher(phone);
 
         if (m.matches() && phone != null && !phone.isEmpty()) {
-            isValid = true;
+            return true;
         } else {
-            isValid = false;
             error = new GenesisError(ErrorMessages.INVALID_PHONE);
             notValidParamsList.add(phone);
-        }
 
-        return isValid;
+            return false;
+        }
     }
 
     // Validate Url
@@ -90,14 +84,13 @@ public class GenesisValidator {
         }
 
         if (m != null && m.matches() && url != null && !url.isEmpty()) {
-            isValid = true;
+            return true;
         } else {
-            isValid = false;
             error = new GenesisError(ErrorMessages.INVALID_NOTIFICATION_URL);
             notValidParamsList.add(url);
-        }
 
-        return isValid;
+            return false;
+        }
     }
 
     public Boolean validateTransactionType(String transactionType) throws IllegalAccessException {
@@ -123,16 +116,16 @@ public class GenesisValidator {
 
     public Boolean validateString(String param, String value) {
         if (value == null || value.isEmpty() || value.equals("null")) {
-            isValid = false;
+
             error = new GenesisError(ErrorMessages.EMPTY_PARAM, param);
             if (!emptyParamsList.contains(param)) {
                 emptyParamsList.add(param);
             }
-        } else {
-            isValid = true;
-        }
 
-        return isValid;
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public Boolean isValidRequest(PaymentRequest request) {
@@ -165,7 +158,6 @@ public class GenesisValidator {
                 return false;
             }
         }
-
     }
 
     public Boolean isValidKlarnaRequest(KlarnaItemsRequest klarnaRequest, BigDecimal transactionAmount,
@@ -173,51 +165,43 @@ public class GenesisValidator {
         if (klarnaRequest != null) {
             requiredParametersValidator = new RequiredParametersValidator(requiredParameters
                     .getRequiredParametersForKlarnaItem(klarnaRequest));
-
-            if (requiredParametersValidator.isValidRequiredParams()) {
-                isValid = true;
-                error = requiredParametersValidator.getError();
-            } else {
-                isValid = false;
-            }
-
-            // Validate amounts
-            validateTransactionAmount(klarnaRequest, transactionAmount);
-            validateOrderAmount(klarnaRequest, orderTaxAmount);
         } else {
-            isValid = false;
             error = new GenesisError(ErrorMessages.REQUIRED_PARAMS, "items");
+            return false;
         }
 
-        if (!isValid) {
-            return false;
-        } else {
+        if (klarnaRequest != null && requiredParametersValidator.isValidRequiredParams()
+                && validateTransactionAmount(klarnaRequest, transactionAmount)
+                && validateOrderTaxAmount(klarnaRequest, orderTaxAmount)) {
             return true;
+        } else {
+            return false;
         }
     }
 
-    protected void validateTransactionAmount(KlarnaItemsRequest klarnaRequest, BigDecimal transactionAmount) {
+    protected Boolean validateTransactionAmount(KlarnaItemsRequest klarnaRequest, BigDecimal transactionAmount) {
         // Transaction amount
         if (transactionAmount != null
                 && transactionAmount.doubleValue() > 0
                 && klarnaRequest.getTotalAmounts().doubleValue() > 0
                 && transactionAmount.doubleValue() == klarnaRequest.getTotalAmounts().doubleValue()) {
-            isValid = true;
+            return true;
         } else {
-            isValid = false;
             error = new GenesisError(ErrorMessages.INVALID_TOTAL_AMOUNTS);
+            return false;
         }
     }
 
-    protected void validateOrderAmount(KlarnaItemsRequest klarnaRequest, BigDecimal orderTaxAmount) {
-        if (orderTaxAmount != null) {
-            if (orderTaxAmount.doubleValue() > 0
-                    && orderTaxAmount.doubleValue() == klarnaRequest.getTotalTaxAmounts().doubleValue()) {
-                isValid = true;
-            } else {
-                isValid = false;
-                error = new GenesisError(ErrorMessages.INVALID_TOTAL_TAX_AMOUNTS);
-            }
+    protected Boolean validateOrderTaxAmount(KlarnaItemsRequest klarnaRequest, BigDecimal orderTaxAmount) {
+        // Order tax amount
+        if (orderTaxAmount != null && orderTaxAmount.doubleValue() > 0
+                && orderTaxAmount.doubleValue() == klarnaRequest.getTotalTaxAmounts().doubleValue()) {
+            return true;
+        } else if (orderTaxAmount == null) {
+            return true;
+        } else {
+            error = new GenesisError(ErrorMessages.INVALID_TOTAL_TAX_AMOUNTS);
+            return false;
         }
     }
 

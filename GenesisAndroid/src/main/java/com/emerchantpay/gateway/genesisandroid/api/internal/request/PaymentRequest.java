@@ -307,7 +307,9 @@ public class PaymentRequest extends Request implements PaymentAttributes, Custom
                     if (validator.isValidKlarnaRequest(klarnaItemsRequest, amount, orderTaxAmount)
                             && validator.isValidRequest(this)) {
                         return true;
-                    } else return false;
+                    } else {
+                        return false;
+                    }
                 default:
                     if (validator.isValidRequest(this)) {
                         return true;
