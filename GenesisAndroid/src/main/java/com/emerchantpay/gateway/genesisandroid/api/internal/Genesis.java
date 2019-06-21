@@ -15,6 +15,8 @@ import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError;
 import com.emerchantpay.gateway.genesisandroid.api.ui.GenesisWebViewActivity;
 import com.emerchantpay.gateway.genesisandroid.api.util.Configuration;
 
+import java.net.URL;
+
 public class Genesis {
 
     // Application context
@@ -76,6 +78,16 @@ public class Genesis {
             Intent intent = new Intent(context, GenesisWebViewActivity.class);
             intent.putExtra(IntentExtras.EXTRA_REDIRECT_URL, redirectUrl);
             intent.putExtra(IntentExtras.EXTRA_UNIQUE_ID, uniqueId);
+            intent.putExtra(IntentExtras.EXTRA_CONFIGURATION, configuration);
+            ((Activity) context).startActivityForResult(intent, 1);
+        }
+    }
+
+    public void loadRedirectUrl(URL url) {
+        if (url != null) {
+            // Start activity
+            Intent intent = new Intent(context, GenesisWebViewActivity.class);
+            intent.putExtra(IntentExtras.EXTRA_REDIRECT_URL, String.valueOf(url));
             intent.putExtra(IntentExtras.EXTRA_CONFIGURATION, configuration);
             ((Activity) context).startActivityForResult(intent, 1);
         }

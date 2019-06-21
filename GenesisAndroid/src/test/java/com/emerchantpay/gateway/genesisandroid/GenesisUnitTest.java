@@ -14,11 +14,18 @@ import com.emerchantpay.gateway.genesisandroid.api.util.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class GenesisUnitTest {
@@ -95,5 +102,18 @@ public class GenesisUnitTest {
         when(response.isSuccess()).thenReturn(false);
 
         assertFalse(genesisHandler.getResponse().isSuccess());
+    }
+
+    @Test
+    public void testSuccessLoadUrl() throws MalformedURLException {
+        genesisHandler.loadRedirectUrl(new URL("https://google.com"));
+        verify(genesisHandler, times(1))
+                .loadRedirectUrl(new URL("https://google.com"));
+    }
+
+    @Test(expected = Exception.class)
+    public void testFailureLoadUrl() throws MalformedURLException {
+        doThrow().when(genesisHandler).loadRedirectUrl(null);
+        genesisHandler.loadRedirectUrl(null);
     }
 }
