@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.1.3'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.2.0'
 }
 ```
 
@@ -71,117 +71,134 @@ Basic Usage
 
 * MainActivity.java
 
-```java
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.View;
+```kotlin
+import android.R
+import android.app.Activity
+import android.os.Bundle
+import android.view.View
 
-import com.emerchantpay.gateway.androidgenesissample.R;
-import com.emerchantpay.gateway.genesisandroid.api.ui.AlertDialogHandler;
-import com.emerchantpay.gateway.genesisandroid.api.constants.Endpoints;
-import com.emerchantpay.gateway.genesisandroid.api.constants.Environments;
-import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages;
-import com.emerchantpay.gateway.genesisandroid.api.constants.Locales;
-import com.emerchantpay.gateway.genesisandroid.api.internal.Genesis;
-import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest;
-import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest;
-import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response;
-import com.emerchantpay.gateway.genesisandroid.api.models.Country;
-import com.emerchantpay.gateway.genesisandroid.api.models.Currency;
-import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError;
-import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress;
-import com.emerchantpay.gateway.genesisandroid.api.models.WPFTransactionTypes;
-import com.emerchantpay.gateway.genesisandroid.api.util.Configuration;
+import com.emerchantpay.gateway.androidgenesissample.R
+import com.emerchantpay.gateway.genesisandroid.api.ui.AlertDialogHandler
+import com.emerchantpay.gateway.genesisandroid.api.constants.Endpoints
+import com.emerchantpay.gateway.genesisandroid.api.constants.Environments
+import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
+import com.emerchantpay.gateway.genesisandroid.api.constants.Locales
+import com.emerchantpay.gateway.genesisandroid.api.internal.Genesis
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
+import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response
+import com.emerchantpay.gateway.genesisandroid.api.models.Country
+import com.emerchantpay.gateway.genesisandroid.api.models.Currency
+import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
+import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress
+import com.emerchantpay.gateway.genesisandroid.api.models.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.util.Configuration
 
-import java.math.BigDecimal;
-import java.util.UUID;
+import java.math.BigDecimal
+import java.util.UUID
 
-public class MainActivity extends Activity {
+class MainActivity : Activity() {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
     }
 
-    public void loadPaymentPage(View view) throws IllegalAccessException {
+    @Throws(IllegalAccessException::class)
+    fun loadPaymentPage(view: View) {
 
         // Generate unique Id
-        String uniqueId = UUID.randomUUID().toString();
+        val uniqueId = UUID.randomUUID().toString()
 
         // Create configuration
-        Configuration configuration = new Configuration("SET_YOUR_USERNAME",
+        val configuration = Configuration("SET_YOUR_USERNAME",
                 "SET_YOUR_PASSWORD",
-                Environments.STAGING, Endpoints.EMERCHANTPAY, Locales.EN);
+                Environments.STAGING, Endpoints.EMERCHANTPAY, Locales.EN)
 
         // Enable Debug mode
-        configuration.setDebugMode(true);
+        configuration.setDebugMode(true)
 
         // Alert dialog
-        AlertDialogHandler dialogHandler;
+        var dialogHandler: AlertDialogHandler
 
         // Create Billing PaymentAddress
-        PaymentAddress billingAddress = new PaymentAddress("John", "Doe",
+        val billingAddress = PaymentAddress("John", "Doe",
                 "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
-                "Washington", new Country().UnitedStates);
+                "Washington", Country.UnitedStates)
 
         // Create Transaction types
-        TransactionTypesRequest transactionTypes = new TransactionTypesRequest();
-        transactionTypes.addTransaction(WPFTransactionTypes.sale);
+        val transactionTypes = TransactionTypesRequest()
+        transactionTypes.addTransaction(WPFTransactionTypes.sale)
 
         // Init WPF API request
-        PaymentRequest paymentRequest = new PaymentRequest(this, uniqueId,
-                new BigDecimal("2.00"), new Currency().USD,
+        val paymentRequest = PaymentRequest(this, uniqueId,
+                BigDecimal("2.00"), Currency.USD,
                 "john@example.com", "+555555555", billingAddress,
-                "https://example.com", transactionTypes);
+                "https://example.com", transactionTypes)
 
-        Genesis genesis = new Genesis(this, configuration, paymentRequest);
+        val genesis = Genesis(this, configuration, paymentRequest)
 
         // Genesis Error handler
-        GenesisError error;
+        var error: GenesisError?// Get Error Handler
+        // Get Error Handler
 
-        if (!genesis.isConnected(this)) {
-            dialogHandler = new AlertDialogHandler(this, "Error",
-                    ErrorMessages.CONNECTION_ERROR);
-            dialogHandler.show();
-        }
+        //Execute WPF API request
 
-        if (genesis.isConnected(this) && genesis.isValidData()) {
-            //Execute WPF API request
-            genesis.push();
+        // Get response
 
-            // Get response
-            Response response = genesis.getResponse();
-
-            // Check if response isSuccess
-            if (!response.isSuccess()) {
-                // Get Error Handler
-                error = response.getError();
-
-                dialogHandler = new AlertDialogHandler(this, "Failure",
-                        "Code: " + error.getCode() + "\nMessage: "
-                                + error.getMessage());
-                dialogHandler.show();
+        // Check if response isSuccess
+        when {
+            genesis.isConnected(this)!! -> {
+                dialogHandler = AlertDialogHandler(this, "Error",
+                        ErrorMessages.CONNECTION_ERROR)
+                dialogHandler.show()
             }
-        }
 
-        if (!genesis.isValidData()) {
             // Get Error Handler
-            error = genesis.getError();
+        }
 
-            String message = error.getMessage();
-            String technicalMessage;
+        // Get Error Handler
+        when {
+            genesis.isConnected(this)!! && genesis.isValidData!! -> {
+                //Execute WPF API request
+                genesis.push()
 
-            if (error.getTechnicalMessage() != null && !error.getTechnicalMessage().isEmpty()) {
-                technicalMessage = error.getTechnicalMessage();
-            } else {
-                technicalMessage = "";
+                // Get response
+                val response = genesis.response
+
+                // Check if response isSuccess
+                when {
+                    response!!.isSuccess!! -> {
+                        // Get Error Handler
+                        error = response!!.error
+
+                        dialogHandler = AlertDialogHandler(this, "Failure",
+                                "Code: " + error!!.code + "\nMessage: "
+                                        + error!!.message)
+                        dialogHandler.show()
+                    }
+                }
             }
+        }
 
-            dialogHandler = new AlertDialogHandler(this, "Invalid",
-                    technicalMessage + " " + message);
+        when {
+            genesis.isValidData!! -> {
+                // Get Error Handler
+                error = genesis.error
 
-            dialogHandler.show();
+                val message = error!!.message
+                val technicalMessage: String?
+
+                when {
+                    error!!.technicalMessage != null && !error!!.technicalMessage!!.isEmpty() -> technicalMessage = error!!.technicalMessage
+                    else -> technicalMessage = ""
+                }
+
+                dialogHandler = AlertDialogHandler(this, "Invalid",
+                        "$technicalMessage $message")
+
+                dialogHandler.show()
+            }
         }
     }
 }
@@ -191,35 +208,35 @@ public class MainActivity extends Activity {
 
 Set usage, description, lifetime
 
-```java
-paymentRequest.setUsage("TICKETS");
-paymentRequest.setDescription("Description");
-paymentRequest.setLifetime(60);
+```kotlin
+paymentRequest.setUsage("TICKETS")
+        paymentRequest.setDescription("Description")
+        paymentRequest.setLifetime(60)
 ```
 
 Set shipping address
 
-```java
-PaymentAddress shippingAddress = nnew PaymentAddress("John", "Doe",
+```kotlin
+val shippingAddress = PaymentAddress("John", "Doe",
                 "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
-                "Washington", new Country().UnitedStates);
+                "Washington", Country.UnitedStates)
 
-paymentRequest.setShippingAddress(shippingAddress);
+paymentRequest.setShippingAddress(shippingAddress)
 ```
 
 Set Risk Params
 
-```java
+```kotlin
 // Risk params
-RiskParams riskParams = new RiskParams("1002547", "1DA53551-5C60-498C-9C18-8456BDBA74A9",
-        "987-65-4320", "12-34-56-78-9A-BC", "123456",
-        "emil@example.com", "+49301234567", "245.253.2.12",
-        "10000000000", "1234", "100000000", "John",
-        "Doe", "US", "test", "245.25 3.2.12",
-        "test", "test123456", "Bin name",
-        "+49301234567");
+val riskParams = RiskParams("1002547", "1DA53551-5C60-498C-9C18-8456BDBA74A9",
+                "987-65-4320", "12-34-56-78-9A-BC", "123456",
+                "emil@example.com", "+49301234567", "245.253.2.12",
+                "10000000000", "1234", "100000000", "John",
+                "Doe", "US", "test", "245.25 3.2.12",
+                "test", "test123456", "Bin name",
+                "+49301234567")
 
-paymentRequest.setRiskParams(riskParams);
+paymentRequest.setRiskParams(riskParams)
 ```
 
 Running Tests

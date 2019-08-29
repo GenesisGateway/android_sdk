@@ -1,0 +1,27 @@
+package com.emerchantpay.gateway.genesisandroid.api.constants
+
+object ErrorMessages {
+    const val CONNECTION_ERROR = "Check Your Internet Connection!!! You are not connected to the Internet..."
+    const val INVALID_AMOUNT = "Please populate valid amount"
+    const val INVALID_TOTAL_AMOUNTS = "Please populate valid total amounts"
+    const val INVALID_TOTAL_TAX_AMOUNTS = "Please populate valid total tax amounts"
+    const val INVALID_EMAIL = "Please populate valid Email address"
+    const val INVALID_NOTIFICATION_URL = "Please populate valid Notification url"
+    const val INVALID_PHONE = "Please populate valid Phone number"
+    const val INVALID_TRANSACTION_TYPE = "Invalid transaction type"
+    const val EMPTY_PARAM = "param is empty"
+    const val EMPTY_PARAMS = "params are empty"
+    const val REQUIRED_PARAM = "param is required"
+    const val REQUIRED_PARAMS = "params are required"
+    const val AUTHENTICATION_ERROR = "Authentication Error"
+    const val SSL_ERROR = "SSL Verification failed."
+    const val NOT_FOUND_ERROR = "Not Found Error"
+    const val SERVER_ERROR = "Server Error"
+    const val UPGRADE_ERROR = "Upgrade Required Error"
+    const val MAINTENANCE_ERROR = "Down for Maintenance Error"
+    const val UNEXPECTED_HTTP_ERROR = "Unexpected HTTP_RESPONSE"
+    const val INVALID_REMINDER_AFTER = "After parameter must be between 1 minute and 31 days in minutes."
+    const val INVALID_CHANNEL = "Invalid channel value. Allowed are:  "
+    const val INVALID_REMINDERS_NUMBER = "Maximum number of 3 allowed reminders reached. You can't add more reminders."
+    const val INVALID_CONSUMER_ID = "Invalid consumer_id. Max. length is 10 digits."
+}

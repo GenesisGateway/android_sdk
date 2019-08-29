@@ -20,6 +20,7 @@ before_install:
   - yes | sdkmanager "platforms;android-27"
 
 script: 
-    - ./gradlew --stacktrace lint test :GenesisAndroid:assembleDebug :GenesisAndroid:assembleRelease  
+    - ./gradlew clean
+    - ./gradlew assembleDebug
 
 after_success: ./script/deploy_snapshot.sh
