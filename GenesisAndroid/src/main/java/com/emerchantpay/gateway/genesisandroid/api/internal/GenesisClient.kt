@@ -2,7 +2,11 @@ package com.emerchantpay.gateway.genesisandroid.api.internal
 
 import android.content.Context
 import android.util.Log
+import com.emerchantpay.gateway.genesisandroid.api.constants.Endpoints
 import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.RetrieveConsumerRequest
+import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response
 import com.emerchantpay.gateway.genesisandroid.api.network.HttpAsyncTask
 import com.emerchantpay.gateway.genesisandroid.api.util.*
 import java.util.concurrent.ExecutionException
@@ -98,6 +102,11 @@ open class GenesisClient : Request {
                 configuration?.tokenEnabled = false
                 configuration?.action = "retrieval_requests/by_date"
             }
+            "retrieve_consumer_request" -> {
+                configuration?.wpfEnabled = false
+                configuration?.tokenEnabled = false
+                configuration?.action = ""
+            }
             else -> {
                 configuration?.wpfEnabled = false
                 configuration?.tokenEnabled = true
@@ -108,14 +117,25 @@ open class GenesisClient : Request {
         http = HttpAsyncTask(configuration)
 
         try {
-            response = http!!.execute(configuration?.baseUrl, genesisRequest).get()
+            val paymentRequest = genesisRequest as PaymentRequest
+            response = http!!.execute(configuration?.baseUrl, paymentRequest).get()
 
             // Retrieve and store consumer id
             val sharedPrefs = GenesisSharedPreferences()
             val result = this.transaction?.request
-            val consumerId = result?.transaction?.consumerId
+            var consumerId = result?.transaction?.consumerId
             when {
-                (sharedPrefs.getString(context, SharedPrefConstants.CONSUMER_ID) == null || sharedPrefs.getString(context, SharedPrefConstants.CONSUMER_ID).isEmpty())
+                Response(this).isSuccess!!
+                        && consumerId.isNullOrEmpty()
+                        && !paymentRequest.getCustomerEmail().isNullOrEmpty() -> {
+                    consumerId = retrieveConsumerIdFromGenesisGateway(paymentRequest.getCustomerEmail())
+                    when {
+                        !consumerId.isNullOrEmpty() ->
+                            sharedPrefs.putString(context, SharedPrefConstants.CONSUMER_ID,
+                                    KeyStoreUtil(context).encryptData(consumerId))
+                    }
+                }
+                sharedPrefs.getString(context, SharedPrefConstants.CONSUMER_ID).isNullOrEmpty()
                         && response!!.isSuccess
                         && consumerId != null
                         && consumerId.isNotEmpty() -> sharedPrefs.putString(context, SharedPrefConstants.CONSUMER_ID,
@@ -128,5 +148,25 @@ open class GenesisClient : Request {
         }
 
         return this
+    }
+
+    protected fun retrieveConsumerIdFromGenesisGateway(email: String?): String? {
+        http = HttpAsyncTask(configuration)
+
+        val retrieveConsumerRequest = RetrieveConsumerRequest(context, email)
+        when {
+            configuration?.endpoint == Endpoints.EMERCHANTPAY -> {
+                configuration?.endpoint = Endpoints.RETRIEVE_CONSUMER_EMERCHANTPAY
+            }
+            configuration?.endpoint == Endpoints.ECOMPROCESSING -> {
+                configuration?.endpoint = Endpoints.RETRIEVE_CONSUMER_ECOMPROCESSING
+            }
+        }
+        configuration?.wpfEnabled = false
+        configuration?.tokenEnabled = false
+        configuration?.action = ""
+        response = http!!.execute(configuration?.baseUrl, retrieveConsumerRequest).get()
+        val result = this.transaction?.request
+        return result?.transaction?.consumerId
     }
 }

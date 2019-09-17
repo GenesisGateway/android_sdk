@@ -15,5 +15,9 @@ class Endpoints(val endpointName: String) : Serializable {
 
         // Domain for Emerchantpay's Genesis instance
         val EMERCHANTPAY = Endpoints("emerchantpay.net")
+
+        // Domains for Consumer API
+        val RETRIEVE_CONSUMER_EMERCHANTPAY = Endpoints("emerchantpay.net/v1/retrieve_consumer")
+        val RETRIEVE_CONSUMER_ECOMPROCESSING = Endpoints("e-comprocessing.net/v1/retrieve_consumer")
     }
 }

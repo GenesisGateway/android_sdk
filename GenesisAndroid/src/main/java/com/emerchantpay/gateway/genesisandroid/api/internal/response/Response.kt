@@ -45,6 +45,10 @@ open class Response(// Genesis client
     val transaction: Transaction?
         get() = client.transaction?.request?.transaction
 
+    // Get Consumer Id
+    val consumerId: String?
+        get() = transaction?.consumerId
+
     // Get success transaction
     val isSuccess: Boolean?
         get() = !(status == TransactionStates.ERROR || status == TransactionStates.DECLINED)

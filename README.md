@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.2.0'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.2.1'
 }
 ```
 
@@ -140,24 +140,15 @@ class MainActivity : Activity() {
 
         // Genesis Error handler
         var error: GenesisError?// Get Error Handler
-        // Get Error Handler
 
-        //Execute WPF API request
-
-        // Get response
-
-        // Check if response isSuccess
         when {
             genesis.isConnected(this)!! -> {
                 dialogHandler = AlertDialogHandler(this, "Error",
                         ErrorMessages.CONNECTION_ERROR)
                 dialogHandler.show()
             }
-
-            // Get Error Handler
         }
 
-        // Get Error Handler
         when {
             genesis.isConnected(this)!! && genesis.isValidData!! -> {
                 //Execute WPF API request

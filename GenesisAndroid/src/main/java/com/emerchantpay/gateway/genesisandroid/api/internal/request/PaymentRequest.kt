@@ -1,9 +1,7 @@
 package com.emerchantpay.gateway.genesisandroid.api.internal.request
 
 import android.content.Context
-import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
-import com.emerchantpay.gateway.genesisandroid.api.constants.TransactionTypes
-import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
+import com.emerchantpay.gateway.genesisandroid.api.constants.*
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.BaseAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.RiskParamsAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.customerinfo.CustomerInfoAttributes
@@ -16,10 +14,7 @@ import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
 import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress
 import com.emerchantpay.gateway.genesisandroid.api.models.RiskParams
 import com.emerchantpay.gateway.genesisandroid.api.models.klarna.KlarnaItem
-import com.emerchantpay.gateway.genesisandroid.api.util.GenesisSharedPreferences
-import com.emerchantpay.gateway.genesisandroid.api.util.KeyStoreUtil
-import com.emerchantpay.gateway.genesisandroid.api.util.Request
-import com.emerchantpay.gateway.genesisandroid.api.util.RequestBuilder
+import com.emerchantpay.gateway.genesisandroid.api.util.*
 import java.math.BigDecimal
 import java.math.MathContext
 import java.util.*
@@ -40,7 +35,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     internal var notificationUrl: String = ""
     internal lateinit var cancelUrl: String
     internal var usage: String = ""
-    internal var consumerId: String = ""
+    internal var consumerId: String? = ""
     internal lateinit var customerEmail: String
     internal lateinit var customerPhone: String
     internal var lifetime: Int = 0
@@ -373,10 +368,10 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                 }
 
                 // Pay Later
-                if (payLater == true && reminders.error == null) {
-                    paymentRequestBuilder!!.addElement("reminders", reminders)
-                } else {
-                    error = reminders.error
+                when {
+                    payLater == true && reminders.error == null ->
+                        paymentRequestBuilder!!.addElement("reminders", reminders)
+                    else -> error = reminders.error
                 }
 
                 return paymentRequestBuilder
@@ -386,8 +381,8 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     }
 
     fun getError(): GenesisError? {
-        if (validator.error != null) {
-            error = validator.error
+        when {
+            validator.error != null -> error = validator.error
         }
 
         return error
@@ -417,10 +412,11 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         return rememberCard!!
     }
 
-    fun getConsumerId(): String {
+    fun getConsumerId(): String? {
         try {
             when {
-                consumerId != null && consumerId!!.isNotEmpty() -> paymentRequestBuilder!!.addElement(SharedPrefConstants.CONSUMER_ID, consumerId!!)
+                consumerId != null && consumerId!!.isNotEmpty() ->
+                    paymentRequestBuilder!!.addElement(SharedPrefConstants.CONSUMER_ID, consumerId!!)
                 else -> {
                     consumerId = context?.let {
                         KeyStoreUtil(it)

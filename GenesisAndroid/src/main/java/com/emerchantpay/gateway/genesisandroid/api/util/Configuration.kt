@@ -6,8 +6,8 @@ import com.emerchantpay.gateway.genesisandroid.api.constants.Environments
 import java.io.Serializable
 import java.util.*
 
-class Configuration(var username: String?, var password: String?, val environment: Environments, val endpoint: Endpoints, var language: Locale?) : Serializable {
-    var token: String? = null
+class Configuration(var username: String?, var password: String?, val environment: Environments, var endpoint: Endpoints, var language: Locale?) : Serializable {
+        var token: String? = null
     var action: String? = null
     var tokenEnabled: Boolean? = true
     var wpfEnabled: Boolean? = false
