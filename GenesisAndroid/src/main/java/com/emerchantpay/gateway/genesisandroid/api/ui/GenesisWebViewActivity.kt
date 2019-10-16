@@ -113,7 +113,7 @@ open class GenesisWebViewActivity : Activity() {
                 .getSerializable(IntentExtras.EXTRA_CONFIGURATION) as Configuration
 
         val reconcileRequest = ReconcileRequest()
-        reconcileRequest.setUniqueId(uniqueId)
+        uniqueId?.let { reconcileRequest.setUniqueId(it) }
 
         val genesis = Genesis(this, configuration, reconcileRequest)
         genesis.push()

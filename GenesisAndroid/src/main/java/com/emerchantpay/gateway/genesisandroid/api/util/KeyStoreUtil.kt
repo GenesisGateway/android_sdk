@@ -6,9 +6,9 @@ import android.os.Build
 import android.security.KeyPairGeneratorSpec
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import android.support.annotation.RequiresApi
 import android.util.Base64
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -187,13 +187,15 @@ class KeyStoreUtil(private val mContext: Context?) {
         val start = Calendar.getInstance()
         val end = Calendar.getInstance()
         end.add(Calendar.YEAR, 30)
-        val spec = KeyPairGeneratorSpec.Builder(mContext)
+        val spec = mContext?.let {
+            KeyPairGeneratorSpec.Builder(it)
                 .setAlias(KEY_ALIAS)
                 .setSubject(X500Principal("CN=$KEY_ALIAS"))
                 .setSerialNumber(BigInteger.TEN)
                 .setStartDate(start.time)
                 .setEndDate(end.time)
                 .build()
+        }
         val kpg = KeyPairGenerator.getInstance(RSA_ALGORITHM_NAME, ANDROID_KEY_STORE_NAME)
         kpg.initialize(spec)
         kpg.generateKeyPair()

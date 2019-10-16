@@ -75,7 +75,7 @@ class GenesisSharedPreferences {
                 .apply()
     }
 
-    fun getString(context: Context?, key: String): String {
+    fun getString(context: Context?, key: String): String? {
         return getSharedPreferences(context)
                 .getString(key, "")
     }
