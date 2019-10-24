@@ -1,7 +1,9 @@
 package com.emerchantpay.gateway.genesisandroid.api.internal.request
 
 import android.content.Context
-import com.emerchantpay.gateway.genesisandroid.api.constants.*
+import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
+import com.emerchantpay.gateway.genesisandroid.api.constants.TransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.BaseAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.RiskParamsAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.customerinfo.CustomerInfoAttributes
@@ -14,7 +16,10 @@ import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
 import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress
 import com.emerchantpay.gateway.genesisandroid.api.models.RiskParams
 import com.emerchantpay.gateway.genesisandroid.api.models.klarna.KlarnaItem
-import com.emerchantpay.gateway.genesisandroid.api.util.*
+import com.emerchantpay.gateway.genesisandroid.api.util.GenesisSharedPreferences
+import com.emerchantpay.gateway.genesisandroid.api.util.KeyStoreUtil
+import com.emerchantpay.gateway.genesisandroid.api.util.Request
+import com.emerchantpay.gateway.genesisandroid.api.util.RequestBuilder
 import java.math.BigDecimal
 import java.math.MathContext
 import java.util.*
@@ -72,7 +77,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     private var error: GenesisError? = null
 
     // GenesisValidator
-    internal val validator = GenesisValidator()
+    internal var validator: GenesisValidator? = null
 
     // Shared preferences
     private val sharedPreferences = GenesisSharedPreferences()
@@ -80,13 +85,18 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     // Validate
     val isValidData: Boolean?
         get() {
-            paymentAddress?.let { validator.isValidAddress(it) }
-            validator.isValidConsumerId(consumerId)
+            validator = GenesisValidator()
+            paymentAddress?.let { validator?.isValidAddress(it) }
+            validator?.isValidConsumerId(consumerId)
 
             transactionTypes.transactionTypesList.forEach { transactionType ->
                 return when (transactionType) {
-                    "klarna_authorize" -> orderTaxAmount?.let { amount?.let { it1 -> validator.isValidKlarnaRequest(klarnaItemsRequest, it1, it) } }!! && validator.isValidRequest(this)!!
-                    else -> validator.isValidRequest(this)!!
+                    "klarna_authorize" -> orderTaxAmount?.let {
+                        amount?.let { it1 ->
+                            validator?.isValidKlarnaRequest(klarnaItemsRequest, it1, it)
+                        }
+                    }!! && validator?.isValidRequest(this)!!
+                    else -> validator?.isValidRequest(this)!!
                 }
             }
 
@@ -382,7 +392,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
 
     fun getError(): GenesisError? {
         when {
-            validator.error != null -> error = validator.error
+            validator?.error != null -> error = validator?.error
         }
 
         return error

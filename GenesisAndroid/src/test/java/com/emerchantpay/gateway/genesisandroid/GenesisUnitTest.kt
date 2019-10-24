@@ -45,7 +45,7 @@ class GenesisUnitTest {
         `when`(request!!.validator).thenReturn(validator)
         `when`(request!!.request).thenReturn(request)
 
-        error = request!!.validator.error
+        error = request!!.validator?.error
 
         genesisHandler!!.push()
 
