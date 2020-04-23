@@ -7,6 +7,7 @@ import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.ProgressBar
+import com.emerchantpay.gateway.genesisandroid.api.constants.IntentExtras
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
 
@@ -27,30 +28,27 @@ open class GenesisWebChromeClient(// WebView Activity
         val url = view.url
 
         val returnIntent = Intent()
+        var resultCode: Int? = null
 
-        when  {
-            url.contains(URLConstants.FAILURE_URL.toLowerCase()) -> {
-                webViewActivity.executeReconcile()
-
-                stopLoading(view)
+        when {
+            url.contains(URLConstants.FAILURE_URL) -> {
+                returnIntent.putExtra(IntentExtras.EXTRA_RESULT, "failure")
+                resultCode = Activity.RESULT_OK
             }
-            url.contains(URLConstants.CANCEL_URL.toLowerCase()) -> {
-                stopLoading(view)
-
+            url.contains(URLConstants.CANCEL_URL) -> {
                 returnIntent.putExtra("cancel", "cancel")
-                finishActivity(webViewActivity)
+                resultCode = Activity.RESULT_CANCELED
             }
-            url.contains(URLConstants.SUCCESS_URL.toLowerCase()) -> {
+            url.contains(URLConstants.SUCCESS_URL) -> {
                 returnIntent.putExtra("success", "success")
-                finishActivity(webViewActivity)
-
-                stopLoading(view)
+                resultCode = Activity.RESULT_OK
             }
-            url.contains(URLConstants.DASHBOARD.toLowerCase()) -> {
-                returnIntent.putExtra("dashboard", "dashboard")
-                finishActivity(webViewActivity)
+        }
 
+        when {
+            resultCode != null -> {
                 stopLoading(view)
+                resultCode?.let { finishActivity(webViewActivity, it) }
             }
         }
 
@@ -80,13 +78,13 @@ open class GenesisWebChromeClient(// WebView Activity
         }
     }
 
-    fun stopLoading(view: WebView) {
+    private fun stopLoading(view: WebView) {
         progressBar.visibility = View.GONE
         view.stopLoading()
     }
 
-    fun finishActivity(activity: Activity) {
-        webViewActivity.setResult(Activity.RESULT_OK)
-        webViewActivity.finish()
+    private fun finishActivity(activity: Activity, resultCode: Int) {
+        activity.setResult(resultCode)
+        activity.finish()
     }
 }

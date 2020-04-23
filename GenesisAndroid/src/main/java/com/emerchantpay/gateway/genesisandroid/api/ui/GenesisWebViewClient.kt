@@ -11,6 +11,7 @@ import android.webkit.WebViewClient
 import android.widget.ProgressBar
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
+import com.emerchantpay.gateway.genesisandroid.api.constants.IntentExtras
 import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
 
@@ -26,29 +27,26 @@ open class GenesisWebViewClient(// WebView Activity
 
         // Destroy webview activity
         val returnIntent = Intent()
+        var resultCode: Int? = null
 
         when {
-            url.contains(URLConstants.FAILURE_URL.toLowerCase()) -> {
-                webViewActivity.executeReconcile()
-
-                stopLoading()
+            url.contains(URLConstants.FAILURE_URL) -> {
+                returnIntent.putExtra(IntentExtras.EXTRA_RESULT, "failure")
+                resultCode = Activity.RESULT_OK
             }
-            url.contains(URLConstants.CANCEL_URL.toLowerCase()) -> {
+            url.contains(URLConstants.CANCEL_URL) -> {
                 returnIntent.putExtra("cancel", "cancel")
-                webViewActivity.setResult(Activity.RESULT_CANCELED, returnIntent)
-
-                stopLoading()
+                resultCode = Activity.RESULT_CANCELED
             }
-            url.contains(URLConstants.SUCCESS_URL.toLowerCase()) -> {
+            url.contains(URLConstants.SUCCESS_URL) -> {
                 returnIntent.putExtra("success", "success")
-                webViewActivity.setResult(Activity.RESULT_OK, returnIntent)
-
-                stopLoading()
+                resultCode = Activity.RESULT_OK
             }
-            url.contains(URLConstants.DASHBOARD.toLowerCase()) -> {
-                returnIntent.putExtra("dashboard", "dashboard")
-                webViewActivity.setResult(Activity.RESULT_OK, returnIntent)
+        }
 
+        when {
+            resultCode != null -> {
+                resultCode?.let { webViewActivity.setResult(it, returnIntent) }
                 stopLoading()
             }
         }
@@ -72,12 +70,12 @@ open class GenesisWebViewClient(// WebView Activity
         finishActivity(view, error.primaryError, ErrorMessages.SSL_ERROR)
     }
 
-    fun stopLoading() {
+    private fun stopLoading() {
         progressBar.visibility = View.GONE
         webViewActivity.finish()
     }
 
-    fun finishActivity(view: WebView, errorCode: Int, description: String) {
+    private fun finishActivity(view: WebView, errorCode: Int, description: String) {
         view.stopLoading()
         webViewActivity.finishWithResult(GenesisError(errorCode, description))
     }

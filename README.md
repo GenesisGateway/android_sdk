@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.2.3'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.2.4'
 }
 ```
 
