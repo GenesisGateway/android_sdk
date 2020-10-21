@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.2.4'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.2.5'
 }
 ```
 
@@ -69,7 +69,7 @@ Basic Usage
 </manifest>
 ```
 
-* MainActivity.java
+* MainActivity.kt
 
 ```kotlin
 import android.R
@@ -195,6 +195,125 @@ class MainActivity : Activity() {
 }
 ```
 
+* MainActivity.java
+
+```java
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+
+import com.emerchantpay.gateway.androidgenesissample.R;
+import com.emerchantpay.gateway.genesisandroid.api.ui.AlertDialogHandler;
+import com.emerchantpay.gateway.genesisandroid.api.constants.Endpoints;
+import com.emerchantpay.gateway.genesisandroid.api.constants.Environments;
+import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages;
+import com.emerchantpay.gateway.genesisandroid.api.constants.Locales;
+import com.emerchantpay.gateway.genesisandroid.api.internal.Genesis;
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest;
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest;
+import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response;
+import com.emerchantpay.gateway.genesisandroid.api.models.Country;
+import com.emerchantpay.gateway.genesisandroid.api.models.Currency;
+import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError;
+import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress;
+import com.emerchantpay.gateway.genesisandroid.api.models.WPFTransactionTypes;
+import com.emerchantpay.gateway.genesisandroid.api.util.Configuration;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+
+    public void loadPaymentPage(View view) throws IllegalAccessException {
+        // Generate unique Id
+        String uniqueId = UUID.randomUUID().toString();
+
+        // Create configuration
+        Configuration configuration = new Configuration("SET_YOUR_USERNAME",
+                "SET_YOUR_PASSWORD",
+                Environments.Companion.getSTAGING(),
+                Endpoints.Companion.getEMERCHANTPAY(),
+                Locales.getEN());
+
+        // Enable Debug mode
+        configuration.setDebugMode(true);
+
+        // Alert dialog
+        AlertDialogHandler dialogHandler;
+
+        // Create Billing PaymentAddress
+        PaymentAddress billingAddress = new PaymentAddress("John", "Doe",
+                "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
+                "Washington", new Country().Companion.getUnitedStates());
+
+        // Create Transaction types
+        TransactionTypesRequest transactionTypes = new TransactionTypesRequest();
+        transactionTypes.addTransaction(WPFTransactionTypes.sale);
+
+        // Init WPF API request
+        PaymentRequest paymentRequest = new PaymentRequest(this, uniqueId,
+                new BigDecimal("2.00"), new Currency().Companion.getUSD(),
+                "john@example.com", "+555555555", billingAddress,
+                "https://example.com", transactionTypes);
+
+        Genesis genesis = new Genesis(this, configuration, paymentRequest);
+
+        // Genesis Error handler
+        GenesisError error;
+
+        if (!genesis.isConnected(this)) {
+            dialogHandler = new AlertDialogHandler(this, "Error",
+                    ErrorMessages.CONNECTION_ERROR);
+            dialogHandler.show();
+        }
+
+        if (genesis.isConnected(this) && genesis.isValidData()) {
+            //Execute WPF API request
+            genesis.push();
+
+            // Get response
+            Response response = genesis.getResponse();
+
+            // Check if response isSuccess
+            if (!response.isSuccess()) {
+                // Get Error Handler
+                error = response.getError();
+
+                dialogHandler = new AlertDialogHandler(this, "Failure",
+                        "Code: " + error.getCode() + "\nMessage: "
+                                + error.getMessage());
+                dialogHandler.show();
+            }
+        }
+
+        if (!genesis.isValidData()) {
+            // Get Error Handler
+            error = genesis.getError();
+
+            String message = error.getMessage();
+            String technicalMessage;
+
+            if (error.getTechnicalMessage() != null && !error.getTechnicalMessage().isEmpty()) {
+                technicalMessage = error.getTechnicalMessage();
+            } else {
+                technicalMessage = "";
+            }
+
+            dialogHandler = new AlertDialogHandler(this, "Invalid",
+                    technicalMessage + " " + message);
+
+            dialogHandler.show();
+        }
+    }
+}
+```
+
 ## Additional Usage
 
 Set usage, description, lifetime
@@ -205,6 +324,12 @@ paymentRequest.setUsage("TICKETS")
         paymentRequest.setLifetime(60)
 ```
 
+```java
+paymentRequest.setUsage("TICKETS")
+        paymentRequest.setDescription("Description")
+        paymentRequest.setLifetime(60);
+```
+
 Set shipping address
 
 ```kotlin
@@ -213,6 +338,14 @@ val shippingAddress = PaymentAddress("John", "Doe",
                 "Washington", Country.UnitedStates)
 
 paymentRequest.setShippingAddress(shippingAddress)
+```
+
+```java
+PaymentAddress shippingAddress = nnew PaymentAddress("John", "Doe",
+                "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
+                "Washington", new Country().Companion.getUnitedStates(););
+
+paymentRequest.setShippingAddress(shippingAddress);
 ```
 
 Set Risk Params
@@ -228,6 +361,19 @@ val riskParams = RiskParams("1002547", "1DA53551-5C60-498C-9C18-8456BDBA74A9",
                 "+49301234567")
 
 paymentRequest.setRiskParams(riskParams)
+```
+
+```java
+// Risk params
+RiskParams riskParams = new RiskParams("1002547", "1DA53551-5C60-498C-9C18-8456BDBA74A9",
+                "987-65-4320", "12-34-56-78-9A-BC", "123456",
+                "emil@example.com", "+49301234567", "245.253.2.12",
+                "10000000000", "1234", "100000000", "John",
+                "Doe", "US", "test", "245.25 3.2.12",
+                "test", "test123456", "Bin name",
+                "+49301234567");
+
+paymentRequest.setRiskParams(riskParams);
 ```
 
 Running Tests
