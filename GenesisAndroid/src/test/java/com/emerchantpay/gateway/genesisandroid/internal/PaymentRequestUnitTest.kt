@@ -2,6 +2,7 @@ package com.emerchantpay.gateway.genesisandroid.internal
 
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.models.*
@@ -40,7 +41,7 @@ class PaymentRequestUnitTest {
         // Transaction types
         // Create Transaction types
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.sale)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.SALE)
 
         // Payment paymentRequest
         paymentRequest = PaymentRequest(context!!, uniqueId,

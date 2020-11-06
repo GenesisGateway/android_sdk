@@ -46,8 +46,4 @@ class CustomAttributesRequest : Request {
     override fun getTransactionType(): String {
         return transactionType
     }
-
-    fun done(): TransactionTypesRequest? {
-        return parent
-    }
 }

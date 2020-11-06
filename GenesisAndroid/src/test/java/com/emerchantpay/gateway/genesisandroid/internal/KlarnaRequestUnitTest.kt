@@ -2,6 +2,7 @@ package com.emerchantpay.gateway.genesisandroid.internal
 
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.KlarnaItemTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
@@ -64,7 +65,7 @@ class KlarnaRequestUnitTest {
 
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.klarnaAuthorize)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.KLARNA_AUTHORIZE)
 
         // Payment request
         request = context?.let {

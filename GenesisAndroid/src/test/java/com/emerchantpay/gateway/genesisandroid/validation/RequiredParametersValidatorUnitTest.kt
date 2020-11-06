@@ -2,6 +2,7 @@ package com.emerchantpay.gateway.genesisandroid.validation
 
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.KlarnaItemTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.RequiredParameters
@@ -9,7 +10,6 @@ import com.emerchantpay.gateway.genesisandroid.api.internal.validation.RequiredP
 import com.emerchantpay.gateway.genesisandroid.api.models.Country
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency
 import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress
-import com.emerchantpay.gateway.genesisandroid.api.models.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.models.klarna.KlarnaItem
 import io.mockk.mockk
 import org.junit.Assert.assertFalse
@@ -65,8 +65,8 @@ class RequiredParametersValidatorUnitTest {
 
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.authorize)
-        transactionTypes!!.addTransaction(WPFTransactionTypes.ezeewallet)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.AUTHORIZE)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.EZEEWALLET)
 
         // Payment request
         request = context?.let {
@@ -142,7 +142,7 @@ class RequiredParametersValidatorUnitTest {
     fun testWithTransactionTypesParams() {
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.ppro)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.PPRO)
         transactionTypes!!.addParam("product_name", "TICKETS")
 
         // Payment request
@@ -175,7 +175,7 @@ class RequiredParametersValidatorUnitTest {
     fun testWithMissingTransactionTypesParams() {
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.ppro)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.PPRO)
 
         // Payment request
         request = PaymentRequest(context, transactionId, amount, Currency.USD,
@@ -197,7 +197,7 @@ class RequiredParametersValidatorUnitTest {
     fun testTokenization() {
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.ppro)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.PPRO)
 
         // Payment request
         request = PaymentRequest(context, transactionId, amount, Currency.USD,

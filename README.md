@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.2.5'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.2.6'
 }
 ```
 
@@ -128,7 +128,7 @@ class MainActivity : Activity() {
 
         // Create Transaction types
         val transactionTypes = TransactionTypesRequest()
-        transactionTypes.addTransaction(WPFTransactionTypes.sale)
+        transactionTypes.addTransaction(WPFTransactionTypes.SALE)
 
         // Init WPF API request
         val paymentRequest = PaymentRequest(this, uniqueId,
@@ -254,7 +254,7 @@ public class MainActivity extends Activity {
 
         // Create Transaction types
         TransactionTypesRequest transactionTypes = new TransactionTypesRequest();
-        transactionTypes.addTransaction(WPFTransactionTypes.sale);
+        transactionTypes.addTransaction(WPFTransactionTypes.SALE);
 
         // Init WPF API request
         PaymentRequest paymentRequest = new PaymentRequest(this, uniqueId,

@@ -2,13 +2,12 @@ package com.emerchantpay.gateway.genesisandroid.api.internal.validation
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
-import com.emerchantpay.gateway.genesisandroid.api.constants.TransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.KlarnaItemsRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
 import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress
 import com.emerchantpay.gateway.genesisandroid.api.models.Reminder
-import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.util.*
 import java.util.regex.Matcher
@@ -88,24 +87,18 @@ open class GenesisValidator {
 
     @Throws(IllegalAccessException::class)
     fun validateTransactionType(transactionType: String): Boolean? {
-        var isMatch: Boolean? = false
+        val fields = WPFTransactionTypes::class.java.enumConstants
 
-        val fields = TransactionTypes::class.java.declaredFields
+        val isMatch = fields?.any { field ->
+            transactionType.toLowerCase(Locale.ROOT) == field.value.toLowerCase(Locale.ROOT)
+        } ?: false
 
-        fields.forEach { f ->
-            f.isAccessible = true
-            when {
-                Modifier.isStatic(f.modifiers) && transactionType == f.get(f.name) -> isMatch = true
-            }
-        }
-
-        if (isMatch == true) {
-            return true
-        } else {
+        if (!isMatch) {
             error = GenesisError(ErrorMessages.INVALID_TRANSACTION_TYPE, transactionType)
             notValidParamsList.add(transactionType)
-            return false
         }
+
+        return isMatch
     }
 
     fun validateString(param: String, value: String?): Boolean? {

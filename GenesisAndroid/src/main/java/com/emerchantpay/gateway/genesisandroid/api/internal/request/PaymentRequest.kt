@@ -2,7 +2,7 @@ package com.emerchantpay.gateway.genesisandroid.api.internal.request
 
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
-import com.emerchantpay.gateway.genesisandroid.api.constants.TransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.BaseAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.RiskParamsAttributes
@@ -367,7 +367,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                 consumerId = getConsumerId()
 
                 when {
-                    transactionTypes.transactionTypesList.contains(TransactionTypes.KLARNA_AUTHORIZE) -> orderTaxAmount?.let {
+                    transactionTypes.transactionTypesList.contains(WPFTransactionTypes.KLARNA_AUTHORIZE.value) -> orderTaxAmount?.let {
                         paymentRequestBuilder!!.addElement("customer_gender", customerGender)
                                 .addElement("order_tax_amount", it)
                     }

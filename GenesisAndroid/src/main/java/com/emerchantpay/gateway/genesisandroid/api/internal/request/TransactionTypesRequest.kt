@@ -1,9 +1,10 @@
 package com.emerchantpay.gateway.genesisandroid.api.internal.request
 
 
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
 import com.emerchantpay.gateway.genesisandroid.api.util.Request
-import com.emerchantpay.gateway.genesisandroid.api.util.RequestBuilder
+import com.emerchantpay.gateway.genesisandroid.api.util.RequestBuilderWithAttribute
 import java.util.*
 
 class TransactionTypesRequest : Request {
@@ -23,8 +24,9 @@ class TransactionTypesRequest : Request {
         this.parent = parent
     }
 
-    @Throws(IllegalAccessException::class)
-    fun addTransaction(transactionType: String): TransactionTypesRequest {
+    private fun <T> addTransaction(t: T): TransactionTypesRequest {
+        val transactionType = t.toString()
+
         // validate transaction type
         validator.validateTransactionType(transactionType)
 
@@ -32,6 +34,34 @@ class TransactionTypesRequest : Request {
 
         customAttributes = CustomAttributesRequest(this, transactionType)
         customAttributesList.add(customAttributes!!)
+
+        return this
+    }
+
+    @Throws(IllegalAccessException::class)
+    fun addTransaction(transactionType: String): TransactionTypesRequest {
+        return addTransaction<String>(transactionType)
+    }
+
+    @Throws(IllegalAccessException::class)
+    fun addTransactions(vararg transactionTypes: String): TransactionTypesRequest {
+        transactionTypes.forEach {transactionType ->
+            addTransaction(transactionType)
+        }
+
+        return this
+    }
+
+    @Throws(IllegalAccessException::class)
+    fun addTransaction(transactionType: WPFTransactionTypes): TransactionTypesRequest {
+        return addTransaction<WPFTransactionTypes>(transactionType)
+    }
+
+    @Throws(IllegalAccessException::class)
+    fun addTransactions(vararg transactionTypes: WPFTransactionTypes): TransactionTypesRequest {
+        transactionTypes.forEach {transactionType ->
+            addTransaction(transactionType)
+        }
 
         return this
     }
@@ -67,18 +97,14 @@ class TransactionTypesRequest : Request {
         return buildRequest(root).toQueryString()
     }
 
-    protected fun buildRequest(root: String): RequestBuilder {
+    protected fun buildRequest(root: String): RequestBuilderWithAttribute {
 
-        val builder = RequestBuilder(root)
+        val builder = RequestBuilderWithAttribute(root, "")
 
         customAttributesList.forEach { attribute ->
             builder.addElement("", attribute)
         }
 
         return builder
-    }
-
-    fun done(): PaymentRequest? {
-        return parent
     }
 }

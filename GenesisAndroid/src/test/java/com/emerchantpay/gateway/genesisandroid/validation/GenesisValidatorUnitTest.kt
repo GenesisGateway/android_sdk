@@ -3,6 +3,7 @@ package com.emerchantpay.gateway.genesisandroid.validation
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
@@ -66,8 +67,8 @@ class GenesisValidatorUnitTest {
 
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.authorize)
-        transactionTypes!!.addTransaction(WPFTransactionTypes.ezeewallet)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.AUTHORIZE)
+        transactionTypes!!.addTransaction(WPFTransactionTypes.EZEEWALLET)
 
         // Payment request
         request = context?.let {
@@ -188,7 +189,7 @@ class GenesisValidatorUnitTest {
     @Test
     @Throws(IllegalAccessException::class)
     fun testTransactionTypeValidionSuccess() {
-        assertTrue(validator!!.validateTransactionType(WPFTransactionTypes.authorize)!!)
+        assertTrue(validator!!.validateTransactionType(WPFTransactionTypes.AUTHORIZE.value)!!)
     }
 
     @Test
