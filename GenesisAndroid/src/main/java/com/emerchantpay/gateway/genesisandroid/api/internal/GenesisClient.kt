@@ -5,6 +5,7 @@ import android.util.Log
 import com.emerchantpay.gateway.genesisandroid.api.constants.Endpoints
 import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
+import com.emerchantpay.gateway.genesisandroid.api.internal.request.ReconcileRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.RetrieveConsumerRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response
 import com.emerchantpay.gateway.genesisandroid.api.network.HttpAsyncTask
@@ -17,7 +18,7 @@ open class GenesisClient : Request {
     private var configuration: Configuration? = null
     private var genesisRequest: Request? = null
 
-    constructor(context: Context, configuration: Configuration, request: Request) : super() {
+    constructor(context: Context?, configuration: Configuration?, request: Request?) : super() {
         this.context = context
         this.configuration = configuration
         this.genesisRequest = request
@@ -117,8 +118,14 @@ open class GenesisClient : Request {
         http = HttpAsyncTask(configuration)
 
         try {
-            val paymentRequest = genesisRequest as PaymentRequest
-            response = http!!.execute(configuration?.baseUrl, paymentRequest).get()
+            var paymentRequest: PaymentRequest? = null
+            response = when (genesisRequest) {
+                is ReconcileRequest -> http?.execute(configuration?.baseUrl, genesisRequest as? ReconcileRequest)?.get()
+                else -> {
+                    paymentRequest = genesisRequest as? PaymentRequest
+                    http?.execute(configuration?.baseUrl, paymentRequest)?.get()
+                }
+            }
 
             // Retrieve and store consumer id
             val sharedPrefs = GenesisSharedPreferences()
@@ -127,16 +134,16 @@ open class GenesisClient : Request {
             when {
                 Response(this).isSuccess!!
                         && consumerId.isNullOrEmpty()
-                        && !paymentRequest.getCustomerEmail().isNullOrEmpty() -> {
-                    consumerId = retrieveConsumerIdFromGenesisGateway(paymentRequest.getCustomerEmail())
+                        && !paymentRequest?.getCustomerEmail().isNullOrEmpty() -> {
+                    consumerId = retrieveConsumerIdFromGenesisGateway(paymentRequest?.getCustomerEmail())
                     when {
                         !consumerId.isNullOrEmpty() ->
                             sharedPrefs.putString(context, SharedPrefConstants.CONSUMER_ID,
                                     KeyStoreUtil(context).encryptData(consumerId))
                     }
                 }
-                sharedPrefs.getString(context, SharedPrefConstants.CONSUMER_ID).isNullOrEmpty()
-                        && response!!.isSuccess
+                sharedPrefs?.getString(context, SharedPrefConstants.CONSUMER_ID).isNullOrEmpty()
+                        && response?.isSuccess == true
                         && consumerId != null
                         && consumerId.isNotEmpty() -> sharedPrefs.putString(context, SharedPrefConstants.CONSUMER_ID,
                         KeyStoreUtil(context).encryptData(result?.transaction?.consumerId))
@@ -150,15 +157,15 @@ open class GenesisClient : Request {
         return this
     }
 
-    protected fun retrieveConsumerIdFromGenesisGateway(email: String?): String? {
+    private fun retrieveConsumerIdFromGenesisGateway(email: String?): String? {
         http = HttpAsyncTask(configuration)
 
         val retrieveConsumerRequest = RetrieveConsumerRequest(context, email)
-        when {
-            configuration?.endpoint == Endpoints.EMERCHANTPAY -> {
+        when (configuration?.endpoint) {
+            Endpoints.EMERCHANTPAY -> {
                 configuration?.endpoint = Endpoints.RETRIEVE_CONSUMER_EMERCHANTPAY
             }
-            configuration?.endpoint == Endpoints.ECOMPROCESSING -> {
+            Endpoints.ECOMPROCESSING -> {
                 configuration?.endpoint = Endpoints.RETRIEVE_CONSUMER_ECOMPROCESSING
             }
         }

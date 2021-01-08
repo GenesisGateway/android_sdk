@@ -24,7 +24,7 @@ class ReconcileRequest : Request() {
         return buildRequest(root)?.toQueryString().toString()
     }
 
-    protected fun buildRequest(root: String): RequestBuilder? {
+    private fun buildRequest(root: String): RequestBuilder? {
 
         return uniqueId?.let { RequestBuilder(root).addElement("unique_id", it) }
     }

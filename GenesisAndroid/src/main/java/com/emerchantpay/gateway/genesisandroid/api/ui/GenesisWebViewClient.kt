@@ -30,15 +30,15 @@ open class GenesisWebViewClient(// WebView Activity
         var resultCode: Int? = null
 
         when {
-            url.contains(URLConstants.FAILURE_URL) -> {
+            url.contains(URLConstants.FAILURE_ENDPOINT) -> {
                 returnIntent.putExtra(IntentExtras.EXTRA_RESULT, "failure")
                 resultCode = Activity.RESULT_OK
             }
-            url.contains(URLConstants.CANCEL_URL) -> {
+            url.contains(URLConstants.CANCEL_ENDPOINT) -> {
                 returnIntent.putExtra("cancel", "cancel")
                 resultCode = Activity.RESULT_CANCELED
             }
-            url.contains(URLConstants.SUCCESS_URL) -> {
+            url.contains(URLConstants.SUCCESS_ENDPOINT) -> {
                 returnIntent.putExtra("success", "success")
                 resultCode = Activity.RESULT_OK
             }
@@ -54,7 +54,7 @@ open class GenesisWebViewClient(// WebView Activity
 
     override fun onPageFinished(view: WebView, url: String) {
         super.onPageFinished(view, url)
-        webViewActivity.setActionBarTitle(view.title)
+        view.title?.let { webViewActivity.setActionBarTitle(it) }
 
         // Dismiss Progress bar
         progressBar.visibility = View.GONE

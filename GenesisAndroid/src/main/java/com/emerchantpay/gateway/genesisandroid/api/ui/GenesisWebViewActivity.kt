@@ -51,7 +51,7 @@ open class GenesisWebViewActivity : Activity() {
         // Load WebView
         val webView = GenesisWebView(this, progressBar!!)
         webView.init(this)
-        webView.loadUrl(redirectUrl)
+        redirectUrl?.let { webView.loadUrl(it) }
         pushNewWebView(webView)
     }
 

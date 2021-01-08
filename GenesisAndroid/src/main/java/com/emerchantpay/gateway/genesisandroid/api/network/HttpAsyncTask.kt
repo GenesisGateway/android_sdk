@@ -93,8 +93,8 @@ class HttpAsyncTask(private val configuration: Configuration?) : AsyncTask<Any, 
                     Log.d("REQUEST_METHOD", requestMethod.toString())
                     Log.d("URL", url)
                     Log.d("RESPONSE_CODE", connection.responseCode.toString())
-                    Log.d("POST_BODY", formatSanitizeBodyForLog(postBody))
-                    Log.d("RESPONSE", formatSanitizeBodyForLog(xml))
+                    formatSanitizeBodyForLog(postBody)?.let { Log.d("POST_BODY", it) }
+                    formatSanitizeBodyForLog(xml)?.let { Log.d("RESPONSE", it) }
                 }
             }
 

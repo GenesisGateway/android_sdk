@@ -60,7 +60,7 @@ open class GenesisWebView : WebView {
             CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
         }
 
-        webViewClient = progressBar?.let { GenesisWebViewClient(activity, it) }
+        webViewClient = progressBar?.let { GenesisWebViewClient(activity, it) }!!
         webChromeClient = progressBar?.let { GenesisWebChromeClient(activity, it) }
     }
 
