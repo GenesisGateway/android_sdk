@@ -1,7 +1,6 @@
 package com.emerchantpay.gateway.genesisandroid.api.network
 
 import android.net.SSLCertificateSocketFactory
-import android.os.Build
 import android.util.Log
 import java.io.IOException
 import java.net.InetAddress
@@ -40,18 +39,8 @@ class TLSSocketFactory : SSLSocketFactory {
 
     private fun makeSocketSafe(socket: Socket, host: String): Socket {
         var socket = socket
-        if (socket is SSLSocket) {
-            val tempSocket = TlsSSLSocket(socket, compatible)
-
-            if (delegate is SSLCertificateSocketFactory && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                delegate
-                        .setHostname(socket, host)
-            } else {
-                tempSocket.setHostname(host)
-            }
-
-            socket = tempSocket
-        }
+        if (socket is SSLSocket)
+            socket = TlsSSLSocket(socket, compatible)
         return socket
     }
 

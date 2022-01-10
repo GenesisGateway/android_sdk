@@ -183,16 +183,4 @@ open class DelegateSSLSocket internal constructor(protected val delegate: SSLSoc
     override fun shutdownOutput() {
         delegate.shutdownOutput()
     }
-
-    fun setHostname(host: String): DelegateSSLSocket {
-        try {
-            delegate.javaClass
-                    .getMethod("setHostname", String::class.java)
-                    .invoke(delegate, host)
-        } catch (e: Exception) {
-            throw IllegalStateException("Could not enable SNI", e)
-        }
-
-        return this
-    }
 }
