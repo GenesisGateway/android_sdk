@@ -1,7 +1,6 @@
 package com.emerchantpay.gateway.genesisandroid.api.network
 
 import android.net.SSLCertificateSocketFactory
-import android.os.Build
 import android.util.Log
 import java.io.IOException
 import java.net.InetAddress
@@ -38,48 +37,37 @@ class TLSSocketFactory : SSLSocketFactory {
         return delegate.supportedCipherSuites
     }
 
-    private fun makeSocketSafe(socket: Socket, host: String): Socket {
+    private fun makeSocketSafe(socket: Socket): Socket {
         var socket = socket
-        if (socket is SSLSocket) {
-            val tempSocket = TlsSSLSocket(socket, compatible)
-
-            if (delegate is SSLCertificateSocketFactory && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                delegate
-                        .setHostname(socket, host)
-            } else {
-                tempSocket.setHostname(host)
-            }
-
-            socket = tempSocket
-        }
+        if (socket is SSLSocket)
+            socket = TlsSSLSocket(socket, compatible)
         return socket
     }
 
     @Throws(IOException::class)
     override fun createSocket(s: Socket, host: String, port: Int, autoClose: Boolean): Socket? {
-        return makeSocketSafe(delegate.createSocket(s, host, port, autoClose), host)
+        return makeSocketSafe(delegate.createSocket(s, host, port, autoClose))
     }
 
     @Throws(IOException::class)
     override fun createSocket(host: String, port: Int): Socket? {
-        return makeSocketSafe(delegate.createSocket(host, port), host)
+        return makeSocketSafe(delegate.createSocket(host, port))
     }
 
     @Throws(IOException::class)
     override fun createSocket(host: String, port: Int, localHost: InetAddress, localPort: Int): Socket? {
-        return makeSocketSafe(delegate.createSocket(host, port, localHost, localPort), host)
+        return makeSocketSafe(delegate.createSocket(host, port, localHost, localPort))
     }
 
     @Throws(IOException::class)
     override fun createSocket(host: InetAddress, port: Int): Socket? {
-        return makeSocketSafe(delegate.createSocket(host, port), host.hostName)
+        return makeSocketSafe(delegate.createSocket(host, port))
     }
 
     @Throws(IOException::class)
     override fun createSocket(address: InetAddress, port: Int, localAddress: InetAddress,
                               localPort: Int): Socket? {
-        return makeSocketSafe(delegate.createSocket(address, port, localAddress, localPort),
-                address.hostName)
+        return makeSocketSafe(delegate.createSocket(address, port, localAddress, localPort))
     }
 
     private inner class TlsSSLSocket(delegate: SSLSocket, internal val compatible: Boolean) : DelegateSSLSocket(delegate) {
