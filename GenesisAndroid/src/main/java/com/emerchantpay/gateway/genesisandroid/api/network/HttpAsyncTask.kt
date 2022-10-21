@@ -101,8 +101,9 @@ class HttpAsyncTask(private val configuration: Configuration?) : AsyncTask<Any, 
             nodeWrapper = NodeWrapperFactory.instance.create(xml)
 
             throwExceptionIfErrorStatusCode(connection.responseCode, null)
-            when (requestMethod) {
-                HttpAsyncTask.RequestMethod.DELETE -> return null
+
+            if (requestMethod == RequestMethod.DELETE) {
+                 return null
             }
         } catch (e: IOException) {
             try {
@@ -179,6 +180,7 @@ class HttpAsyncTask(private val configuration: Configuration?) : AsyncTask<Any, 
         return connection
     }
 
+    @Deprecated("Deprecated in Java")
     override fun doInBackground(vararg params: Any): NodeWrapper? {
         return post(params[0] as String, params[1] as Request)
     }

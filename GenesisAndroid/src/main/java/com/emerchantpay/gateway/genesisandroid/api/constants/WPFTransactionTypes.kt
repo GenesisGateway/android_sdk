@@ -165,6 +165,6 @@ enum class WPFTransactionTypes(val value: String) {
     NETBANKING("netbanking");
 
     override fun toString(): String {
-        return name.toLowerCase(Locale.ROOT)
+        return name.lowercase(Locale.ROOT)
     }
 }

@@ -1,6 +1,7 @@
 package com.emerchantpay.gateway.genesisandroid.api.internal.validation
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
+import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages.REQUIRED_PARAMS_THREE_DS_V2
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.KlarnaItemsRequest
@@ -90,7 +91,7 @@ open class GenesisValidator {
         val fields = WPFTransactionTypes::class.java.enumConstants
 
         val isMatch = fields?.any { field ->
-            transactionType.toLowerCase(Locale.ROOT) == field.value.toLowerCase(Locale.ROOT)
+            transactionType.lowercase(Locale.ROOT) == field.value.toLowerCase(Locale.ROOT)
         } ?: false
 
         if (!isMatch) {
@@ -116,10 +117,8 @@ open class GenesisValidator {
         }
     }
 
-    fun isValidRequest(request: PaymentRequest): Boolean? {
-
-        requiredParametersValidator = RequiredParametersValidator(requiredParameters
-                .getRequiredParametersForRequest(request))
+    fun isValidRequest(request: PaymentRequest): Boolean {
+        requiredParametersValidator = RequiredParametersValidator(requiredParameters.getRequiredParametersForRequest(request))
 
         when {
             !requiredParametersValidator!!.isValidRequiredParams!! && notValidParamsList != null
@@ -162,6 +161,15 @@ open class GenesisValidator {
         }
 
         return (requiredParametersValidator!!.isValidRequiredParams!! && validateTransactionAmount(klarnaRequest, transactionAmount)!! && validateOrderTaxAmount(klarnaRequest, orderTaxAmount)!!)
+    }
+
+    fun isValidThreeDsV2Request(request: PaymentRequest): Boolean {
+        return if (request.threeDsV2Params != null)
+            true
+        else {
+            error = GenesisError(REQUIRED_PARAMS_THREE_DS_V2)
+            false
+        }
     }
 
     protected fun validateTransactionAmount(klarnaRequest: KlarnaItemsRequest, transactionAmount: BigDecimal?): Boolean? {

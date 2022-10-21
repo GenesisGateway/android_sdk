@@ -1,7 +1,6 @@
 package com.emerchantpay.gateway.genesisandroid.api.models
 
 open class GenesisError {
-
     var code: Int? = null
         private set
     var technicalMessage: String? = null
@@ -9,7 +8,7 @@ open class GenesisError {
     var message: String? = null
         private set
 
-    constructor() : super() {}
+    constructor() : super()
 
     constructor(code: Int?, message: String, technicalMessage: String) : super() {
 

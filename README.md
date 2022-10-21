@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.2.9'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.3.0'
 }
 ```
 
@@ -375,6 +375,91 @@ RiskParams riskParams = new RiskParams("1002547", "1DA53551-5C60-498C-9C18-8456B
 
 paymentRequest.setRiskParams(riskParams);
 ```
+
+Set 3DSv2 Params
+
+```kotlin
+val threeDsV2Params = ThreeDsV2Params.build {
+    purchaseCategory = ThreeDsV2PurchaseCategory.GOODS
+
+    val merchantRiskPreorderDate = SimpleDateFormat("dd-MM-yyyy").calendar.apply {
+        time = Date()
+        add(Calendar.DATE, 5)
+    }.time
+
+    merchantRisk = ThreeDsV2MerchantRiskParams(
+        ThreeDsV2MerchantRiskShippingIndicator.DIGITAL_GOODS,
+        ThreeDsV2MerchantRiskDeliveryTimeframe.SAME_DAY,
+        ThreeDsV2MerchantRiskReorderItemsIndicator.REORDERED,
+        ThreeDsV2MerchantRiskPreorderPurchaseIndicator.MERCHANDISE_AVAILABLE,
+        merchantRiskPreorderDate,
+        true, 3)
+
+    cardHolderAccount = ThreeDsV2CardHolderAccountParams(
+        SimpleDateFormat("dd-MM-yyyy").parse("11-02-2021"),
+        ThreeDsV2CardHolderAccountUpdateIndicator.UPDATE_30_TO_60_DAYS,
+        SimpleDateFormat("dd-MM-yyyy").parse("13-02-2021"),
+        ThreeDsV2CardHolderAccountPasswordChangeIndicator.PASSWORD_CHANGE_NO_CHANGE,
+        SimpleDateFormat("dd-MM-yyyy").parse("10-01-2021"),
+        ThreeDsV2CardHolderAccountShippingAddressUsageIndicator.ADDRESS_USAGE_MORE_THAN_60DAYS,
+        SimpleDateFormat("dd-MM-yyyy").parse("10-01-2021"),
+        2, 129, 1, 31,
+        ThreeDsV2CardHolderAccountSuspiciousActivityIndicator.NO_SUSPICIOUS_OBSERVED,
+        ThreeDsV2CardHolderAccountRegistrationIndicator.REGISTRATION_30_TO_60_DAYS,
+        SimpleDateFormat("dd-MM-yyyy").parse("03-01-2021"))
+
+    recurring = ThreeDsV2RecurringParams()
+}
+
+paymentRequest?.setThreeDsV2Params(threeDsV2Params)
+```
+
+```java
+Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE, 5);
+        Date merchantRiskPreorderDate = calendar.getTime();
+
+        // Create a builder
+        ThreeDsV2Params.Builder threeDsV2ParamsBuilder = new ThreeDsV2Params.Builder();
+
+        // Set 3DSv2 purchase params
+        threeDsV2ParamsBuilder.setPurchaseCategory(ThreeDsV2PurchaseCategory.GOODS);
+
+        // Set 3DSv2 merchant risk params
+        ThreeDsV2MerchantRiskParams merchantRisk = new ThreeDsV2MerchantRiskParams(
+        ThreeDsV2MerchantRiskShippingIndicator.DIGITAL_GOODS,
+        ThreeDsV2MerchantRiskDeliveryTimeframe.SAME_DAY,
+        ThreeDsV2MerchantRiskReorderItemsIndicator.REORDERED,
+        ThreeDsV2MerchantRiskPreorderPurchaseIndicator.MERCHANDISE_AVAILABLE,
+        merchantRiskPreorderDate,
+        true, 3);
+        threeDsV2ParamsBuilder.setMerchantRisk(merchantRisk);
+
+        // Set 3DSv2 card holder account params
+        ThreeDsV2CardHolderAccountParams cardHolderAccount = new ThreeDsV2CardHolderAccountParams(
+        new SimpleDateFormat("dd-MM-yyyy").parse("11-02-2021"),
+        ThreeDsV2CardHolderAccountUpdateIndicator.UPDATE_30_TO_60_DAYS,
+        new SimpleDateFormat("dd-MM-yyyy").parse("13-02-2021"),
+        ThreeDsV2CardHolderAccountPasswordChangeIndicator.PASSWORD_CHANGE_NO_CHANGE,
+        new SimpleDateFormat("dd-MM-yyyy").parse("10-01-2021"),
+        ThreeDsV2CardHolderAccountShippingAddressUsageIndicator.ADDRESS_USAGE_MORE_THAN_60DAYS,
+        new SimpleDateFormat("dd-MM-yyyy").parse("10-01-2021"),
+        2, 129, 1, 31,
+        ThreeDsV2CardHolderAccountSuspiciousActivityIndicator.NO_SUSPICIOUS_OBSERVED,
+        ThreeDsV2CardHolderAccountRegistrationIndicator.REGISTRATION_30_TO_60_DAYS,
+        new SimpleDateFormat("dd-MM-yyyy").parse("03-01-2021"));
+        threeDsV2ParamsBuilder.setCardHolderAccount(cardHolderAccount);
+
+        // Set 3DSv2 recurring params
+        ThreeDsV2RecurringParams recurring = new ThreeDsV2RecurringParams()
+
+        // Create an instance of ThreeDsV2Params via builder
+        ThreeDsV2Params threeDsV2Params = threeDsV2ParamsBuilder.build();
+        
+        paymentRequest?.setThreeDsV2Params(threeDsV2Params);
+```
+
 
 Running Tests
 --------------

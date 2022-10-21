@@ -2,20 +2,21 @@ package com.emerchantpay.gateway.genesisandroid.api.internal.request
 
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
-import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.BaseAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.RiskParamsAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.customerinfo.CustomerInfoAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.AsyncAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.DescriptorAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.PaymentAttributes
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.threedsv2.ThreeDsV2Attributes
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.threedsv2.definitions.ThreeDsV2ControlDeviceType
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
+import com.emerchantpay.gateway.genesisandroid.api.models.*
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency
-import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
-import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress
-import com.emerchantpay.gateway.genesisandroid.api.models.RiskParams
 import com.emerchantpay.gateway.genesisandroid.api.models.klarna.KlarnaItem
+import com.emerchantpay.gateway.genesisandroid.api.models.threedsv2.ThreeDsV2Params
 import com.emerchantpay.gateway.genesisandroid.api.util.GenesisSharedPreferences
 import com.emerchantpay.gateway.genesisandroid.api.util.KeyStoreUtil
 import com.emerchantpay.gateway.genesisandroid.api.util.Request
@@ -25,7 +26,8 @@ import java.math.MathContext
 import java.util.*
 import kotlin.math.pow
 
-open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, DescriptorAttributes, AsyncAttributes, RiskParamsAttributes {
+open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, DescriptorAttributes,
+    AsyncAttributes, RiskParamsAttributes, ThreeDsV2Attributes {
     // Request Builder
     private var paymentRequestBuilder: RequestBuilder? = null
 
@@ -67,6 +69,9 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     // Risk params
     internal var riskParams: RiskParams? = null
 
+    // 3DSv2 params
+    var threeDsV2Params: ThreeDsV2Params? = null
+
     // Klarna items
     internal var klarnaItemsRequest: KlarnaItemsRequest? = null
 
@@ -96,6 +101,10 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                             validator?.isValidKlarnaRequest(klarnaItemsRequest, it1, it)
                         }
                     }!! && validator?.isValidRequest(this)!!
+
+                    "authorize3d", "sale3d", "init_recurring_sale3d" ->
+                        validator?.isValidThreeDsV2Request(this)!! && validator?.isValidRequest(this)!!
+
                     else -> validator?.isValidRequest(this)!!
                 }
             }
@@ -158,14 +167,14 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     @Throws(IllegalAccessException::class)
     fun setShippingAddress(shippingAddress: PaymentAddress) {
         // Shipping Payment Address
-        setShippingFirstname(shippingAddress?.firstName)
-        setShippingLastname(shippingAddress?.lastname)
-        setShippingPrimaryAddress(shippingAddress?.address1)
-        setShippingSecondaryAddress(shippingAddress?.address2)
-        setShippingZipCode(shippingAddress?.zipCode)
-        setShippingCity(shippingAddress?.city)
-        setShippingState(shippingAddress?.state)
-        setShippingCountry(shippingAddress?.countryName)
+        setShippingFirstname(shippingAddress.firstName)
+        setShippingLastname(shippingAddress.lastname)
+        setShippingPrimaryAddress(shippingAddress.address1)
+        setShippingSecondaryAddress(shippingAddress.address2)
+        setShippingZipCode(shippingAddress.zipCode)
+        setShippingCity(shippingAddress.city)
+        setShippingState(shippingAddress.state)
+        setShippingCountry(shippingAddress.countryName)
     }
 
     fun loadParams() {
@@ -317,6 +326,46 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         return this
     }
 
+    fun setThreeDsV2Params(threeDsV2Params: ThreeDsV2Params) = apply {
+        // Control attributes
+        setDeviceType(ThreeDsV2ControlDeviceType.APPLICATION)
+        setChallengeIndicator(threeDsV2Params.controlChallengeIndicator)
+
+        // Purchase attributes
+        threeDsV2Params.purchaseCategory?.let { setCategory(it) }
+
+        // Merchant risk attributes
+        setShippingIndicator(threeDsV2Params.merchantRisk?.shippingIndicator)
+        setDeliveryTimeframe(threeDsV2Params.merchantRisk?.deliveryTimeframe)
+        setReorderItemsIndicator(threeDsV2Params.merchantRisk?.reorderItemsIndicator)
+        setPreorderPurchaseIndicator(threeDsV2Params.merchantRisk?.preorderPurchaseIndicator)
+        setPreorderDate(threeDsV2Params.merchantRisk?.preorderDate)
+        setIsGiftCard(threeDsV2Params.merchantRisk?.isGiftCard)
+        setGiftCardCount(threeDsV2Params.merchantRisk?.giftCardCount)
+
+        // Card holder account attributes
+        setCreationDate(threeDsV2Params.cardHolderAccount?.creationDate)
+        setUpdateIndicator(threeDsV2Params.cardHolderAccount?.updateIndicator)
+        setLastChangeDate(threeDsV2Params.cardHolderAccount?.lastChangeDate)
+        setPasswordChangeIndicator(threeDsV2Params.cardHolderAccount?.passwordChangeIndicator)
+        setPasswordChangeDate(threeDsV2Params.cardHolderAccount?.passwordChangeDate)
+        setShippingAddressUsageIndicator(threeDsV2Params.cardHolderAccount?.shippingAddressUsageIndicator)
+        setShippingAddressDateFirstUsed(threeDsV2Params.cardHolderAccount?.shippingAddressDateFirstUsed)
+        setTransactionsActivityLast24Hours(threeDsV2Params.cardHolderAccount?.transactionsActivityLast24Hours)
+        setTransactionsActivityPreviousYear(threeDsV2Params.cardHolderAccount?.transactionsActivityPreviousYear)
+        setProvisionAttemptsLast24Hours(threeDsV2Params.cardHolderAccount?.provisionAttemptsLast24Hours)
+        setPurchasesCountLast6Months(threeDsV2Params.cardHolderAccount?.purchasesCountLast6Months)
+        setSuspiciousActivityIndicator(threeDsV2Params.cardHolderAccount?.suspiciousActivityIndicator)
+        setRegistrationIndicator(threeDsV2Params.cardHolderAccount?.registrationIndicator)
+        setRegistrationDate(threeDsV2Params.cardHolderAccount?.registrationDate)
+
+        // Recurring attributes
+        setExpirationDate(threeDsV2Params.recurring?.expirationDate)
+        setFrequency(threeDsV2Params.recurring?.frequency)
+
+        this.threeDsV2Params = threeDsV2Params
+    }
+
     fun addKlarnaItem(klarnaItem: KlarnaItem): KlarnaItemsRequest {
         klarnaItemsRequest = KlarnaItemsRequest(klarnaItem)
         return klarnaItemsRequest as KlarnaItemsRequest
@@ -345,24 +394,25 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         when {
             isValidData!! -> {
                 paymentRequestBuilder = RequestBuilder(root)
-                        .addElement(buildBaseParams().toXML())
-                        .addElement(buildPaymentParams().toXML())
-                        .addElement(buildCustomerInfoParams().toXML())
-                        .addElement("usage", usage)
-                        .addElement("description", description)
-                        .addElement("notification_url", notificationUrl)
-                        .addElement(buildAsyncParams().toXML())
-                        .addElement("return_cancel_url", cancelUrl)
-                        .addElement("lifetime", lifetime)
-                        .addElement("pay_later", payLater!!)
-                        .addElement("crypto", crypto!!)
-                        .addElement("gaming", gaming!!)
-                        .addElement("remember_card", rememberCard!!)
-                        .addElement("billing_address", buildBillingAddress()?.toXML())
-                        .addElement("shipping_address", buildShippingAddress()?.toXML())
-                        .addElement("transaction_types", transactionTypes)
-                        .addElement("risk_params", buildRiskParams().toXML())
-                        .addElement("dynamic_descriptor_params", buildDescriptorParams().toXML())
+                    .addElement(buildBaseParams().toXML())
+                    .addElement(buildPaymentParams().toXML())
+                    .addElement(buildCustomerInfoParams().toXML())
+                    .addElement("usage", usage)
+                    .addElement("description", description)
+                    .addElement("notification_url", notificationUrl)
+                    .addElement(buildAsyncParams().toXML())
+                    .addElement("return_cancel_url", cancelUrl)
+                    .addElement("lifetime", lifetime)
+                    .addElement("pay_later", payLater!!)
+                    .addElement("crypto", crypto!!)
+                    .addElement("gaming", gaming!!)
+                    .addElement("remember_card", rememberCard!!)
+                    .addElement("billing_address", buildBillingAddress().toXML())
+                    .addElement("shipping_address", buildShippingAddress().toXML())
+                    .addElement("transaction_types", transactionTypes)
+                    .addElement("risk_params", buildRiskParams().toXML())
+                    .addElement("threeds_v2_params", buildThreeDsV2Attributes().toXML())
+                    .addElement("dynamic_descriptor_params", buildDescriptorParams().toXML())
 
                 consumerId = getConsumerId()
 

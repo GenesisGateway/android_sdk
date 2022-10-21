@@ -2,18 +2,20 @@
 
 buildscript {
     ext {
-        kotlin_version = '1.6.0'
+        kotlin_version = '1.7.20'
         gradle_plugin_version = '7.0.4'
-        android_material_version = '1.4.0'
-        junit_version = '4.13.1'
-        mockito_core_version = '2.28.2'
-        mockito_inline_version = '2.8.47'
-        mockk_version = '1.11.0'
-        robolectric_version = '4.6.1'
+        android_material_version = '1.6.1'
+        junit_version = '4.13.2'
+        junit5_version = '5.9.1'
+        mockito_core_version = '4.8.1'
+        mockito_inline_version = '4.8.1'
+        mockk_version = '1.13.2'
+        robolectric_version = '4.9'
+        xmlunit_version = '2.9.0'
 
         // AndroidX
-        androidx_appcompat_version = '1.4.0'
-        androidx_constraintlayout_version = '2.1.2'
+        androidx_appcompat_version = '1.5.1'
+        androidx_constraintlayout_version = '2.1.4'
         androidx_multidex_version = '2.0.1'
         androidx_test_runner_version = '1.4.0'
         androidx_espresso_version = '3.4.0'

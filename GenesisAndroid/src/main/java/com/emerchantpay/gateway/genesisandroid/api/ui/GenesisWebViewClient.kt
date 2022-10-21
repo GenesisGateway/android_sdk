@@ -60,6 +60,7 @@ open class GenesisWebViewClient(// WebView Activity
         progressBar.visibility = View.GONE
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onReceivedError(view: WebView, errorCode: Int, description: String,
                                  failingUrl: String) {
         finishActivity(view, errorCode, description)

@@ -24,4 +24,5 @@ object ErrorMessages {
     const val INVALID_CHANNEL = "Invalid channel value. Allowed are:  "
     const val INVALID_REMINDERS_NUMBER = "Maximum number of 3 allowed reminders reached. You can't add more reminders."
     const val INVALID_CONSUMER_ID = "Invalid consumer_id. Max. length is 10 digits."
+    const val REQUIRED_PARAMS_THREE_DS_V2 = "3DSv2 parameters are required for the following transaction types: Authorize3d, Sale3d, InitRecurringSale3d"
 }

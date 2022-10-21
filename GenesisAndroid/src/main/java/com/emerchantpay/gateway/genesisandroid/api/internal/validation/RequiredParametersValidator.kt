@@ -12,6 +12,7 @@ class RequiredParametersValidator : GenesisValidator {
     override var error: GenesisError? = null
         set(value: GenesisError?) {
             super.error = value
+            field = value
         }
 
     // Missing params
