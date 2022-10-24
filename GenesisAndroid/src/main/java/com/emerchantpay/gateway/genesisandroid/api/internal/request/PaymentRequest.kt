@@ -70,7 +70,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     internal var riskParams: RiskParams? = null
 
     // 3DSv2 params
-    var threeDsV2Params: ThreeDsV2Params? = null
+    internal var threeDsV2Params: ThreeDsV2Params? = null
 
     // Klarna items
     internal var klarnaItemsRequest: KlarnaItemsRequest? = null

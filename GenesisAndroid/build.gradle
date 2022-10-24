@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 
 ext {
     PUBLISH_GROUP_ID = 'com.emerchantpay.gateway'
-    PUBLISH_VERSION = '1.3.0'
+    PUBLISH_VERSION = '1.3.1'
     PUBLISH_ARTIFACT_ID = 'genesis-android'
     PUBLISH_DESCRIPTION = 'Genesis Android SDK'
     PUBLISH_URL = 'https://github.com/GenesisGateway/android_sdk'
