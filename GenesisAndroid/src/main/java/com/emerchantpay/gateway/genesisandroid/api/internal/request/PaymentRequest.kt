@@ -169,10 +169,10 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         // Shipping Payment Address
         setShippingFirstname(shippingAddress.firstName)
         setShippingLastname(shippingAddress.lastname)
-        setShippingPrimaryAddress(shippingAddress.address1)
-        setShippingSecondaryAddress(shippingAddress.address2)
-        setShippingZipCode(shippingAddress.zipCode)
-        setShippingCity(shippingAddress.city)
+        shippingAddress.address1?.let { setShippingPrimaryAddress(it) }
+        shippingAddress.address2?.let { setShippingSecondaryAddress(it) }
+        shippingAddress.zipCode?.let { setShippingZipCode(it) }
+        shippingAddress.city?.let { setShippingCity(it) }
         setShippingState(shippingAddress.state)
         setShippingCountry(shippingAddress.countryName)
     }

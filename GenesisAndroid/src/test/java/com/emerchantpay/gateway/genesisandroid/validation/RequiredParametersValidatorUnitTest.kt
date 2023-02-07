@@ -127,8 +127,8 @@ class RequiredParametersValidatorUnitTest {
     fun testWithMissingAddressParams() {
         // Address
         billingAddress = PaymentAddress("John", "Doe",
-                "", "", "10000", "New York",
-                "state", Country().getCountry("United States")!!)
+                "", "", "", "",
+                "", Country().getCountry("United States")!!)
 
         requiredParamsMap = requiredParameters.getRequiredParametersForAddress(billingAddress!!)
 

@@ -74,8 +74,6 @@ class RequiredParameters {
 
     fun getRequiredParametersForAddress(address: PaymentAddress): HashMap<String, String>? {
         requiredParamsMap[firstName] = address.firstName
-        requiredParamsMap[address1] = address.address1
-        requiredParamsMap[zipCode] = address.zipCode
         requiredParamsMap[country] = address.countryCode
         requiredParamsMap[state] = address.state
 
@@ -91,13 +89,11 @@ class RequiredParameters {
         requiredParamsMap[returnCancelUrl] = paymentRequest.returnCancelUrl
         requiredParamsMap[customerEmail] = paymentRequest.customerEmail
         when {
-            paymentRequest.customerEmail != null
-                    && !paymentRequest.customerEmail.isEmpty()
-                    && (paymentRequest.consumerId == null || paymentRequest.consumerId!!.isEmpty()) ->
+            !paymentRequest.customerEmail.isNullOrBlank()
+                    && paymentRequest.consumerId?.isEmpty() == true ->
                 requiredParamsMap[consumerId] = paymentRequest.consumerId as String
         }
-        requiredParamsMap[notificationUrl] = paymentRequest.notificationUrl as String
-        requiredParamsMap[customerPhone] = paymentRequest.customerPhone
+        requiredParamsMap[notificationUrl] = paymentRequest.notificationUrl
         requiredParamsMap[billingAddress] = paymentRequest.getBillingAddress().toXML()
 
         return requiredParamsMap
@@ -114,7 +110,6 @@ class RequiredParameters {
         const val returnCancelUrl = "return_cancel_url"
         const val customerEmail = "customer_email"
         const val consumerId = "consumer_id"
-        const val customerPhone = "customer_phone"
         const val billingAddress = "billing_address"
         const val shippingAddress = "shipping_address"
         const val notificationUrl = "notification_url"

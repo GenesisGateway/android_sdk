@@ -78,6 +78,29 @@ class PaymentRequestUnitTest {
 
     @Test
     @Throws(IllegalAccessException::class)
+    fun testLoadAddressWithEmptyValues() {
+        // Generate unique Id
+        val uniqueId = UUID.randomUUID().toString()
+
+        // Address
+        address = PaymentAddress("John", "Doe", "",
+            "", "", "",
+            "Berlin state", Country.Germany)
+
+        paymentRequest = PaymentRequest(context!!, uniqueId,
+            BigDecimal("2.00"), Currency.USD,
+            "john@example.com", "+55555555", address!!,
+            "https://example.com", transactionTypes!!)
+
+        assertTrue(paymentRequest!!.paymentAddress?.address1?.isEmpty() == true)
+        assertTrue(paymentRequest!!.paymentAddress?.address2?.isEmpty() == true)
+        assertFalse(paymentRequest!!.paymentAddress?.firstName?.isEmpty() == true)
+        assertFalse(paymentRequest!!.paymentAddress?.lastname?.isEmpty() == true)
+        assertFalse(paymentRequest!!.paymentAddress?.countryCode?.isEmpty() == true)
+    }
+
+    @Test
+    @Throws(IllegalAccessException::class)
     fun testLoadTransactionTypes() {
         assertTrue(transactionTypes!!.transactionTypesList.contains("sale"))
     }
