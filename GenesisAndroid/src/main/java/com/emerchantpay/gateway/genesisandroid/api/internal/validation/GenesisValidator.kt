@@ -41,10 +41,13 @@ open class GenesisValidator {
     }
 
     fun validateEmail(email: String?): Boolean? {
-        val m = VALID_EMAIL_REGEX.matcher(email!!)
+        val m = VALID_EMAIL_REGEX.matcher(email)
+
+        if (email.isNullOrBlank())
+            return true
 
         return when {
-            m.matches() && email != null && !email.isEmpty() -> true
+            m.matches() -> true
             else -> {
                 error = GenesisError(ErrorMessages.INVALID_EMAIL)
                 notValidParamsList.add(email)
@@ -55,15 +58,19 @@ open class GenesisValidator {
     }
 
     fun validatePhone(phone: String?): Boolean? {
-        val m = VALID_PHONE_REGEX.matcher(phone!!)
+        val m = VALID_PHONE_REGEX.matcher(phone)
 
-        if (m.matches() && phone != null && !phone.isEmpty()) {
+        if (phone.isNullOrBlank())
             return true
-        } else {
-            error = GenesisError(ErrorMessages.INVALID_PHONE)
-            notValidParamsList.add(phone)
 
-            return false
+        return when {
+            m.matches() -> true
+            else -> {
+                error = GenesisError(ErrorMessages.INVALID_PHONE)
+                notValidParamsList.add(phone)
+
+                false
+            }
         }
     }
 

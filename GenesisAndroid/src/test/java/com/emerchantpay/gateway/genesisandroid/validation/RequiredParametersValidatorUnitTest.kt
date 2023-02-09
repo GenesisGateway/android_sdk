@@ -94,15 +94,15 @@ class RequiredParametersValidatorUnitTest {
         transactionId = UUID.randomUUID().toString()
         amount = BigDecimal("2.00")
         customerEmail = ""
-        customerPhone = "+555555555"
+        customerPhone = ""
         notificationUrl = "http://google.com"
 
         // Payment request
         request = context?.let {
             billingAddress?.let { it1 ->
                 transactionTypes?.let { it2 ->
-                    PaymentRequest(it, transactionId!!, amount!!, Currency.USD,
-                            customerEmail!!, customerPhone!!, it1, notificationUrl, it2)
+                    PaymentRequest(it, transactionId, amount, Currency.USD,
+                            customerEmail, customerPhone, it1, notificationUrl, it2)
                 }
             }
         }
@@ -110,7 +110,31 @@ class RequiredParametersValidatorUnitTest {
         requiredParamsMap = request?.let { requiredParameters.getRequiredParametersForRequest(it) }
 
         validator = RequiredParametersValidator(requiredParamsMap)
-        assertFalse(validator!!.isValidRequiredParams!!)
+        assertTrue(validator!!.isValidRequiredParams!!)
+    }
+
+    @Test
+    @Throws(IllegalAccessException::class)
+    fun testWithNullRequestParams() {
+        // Intitial params
+        transactionId = UUID.randomUUID().toString()
+        amount = BigDecimal("2.00")
+        notificationUrl = "http://google.com"
+
+        // Payment request
+        request = context?.let {
+            billingAddress?.let { it1 ->
+                transactionTypes?.let { it2 ->
+                    PaymentRequest(it, transactionId, amount, Currency.USD,
+                        null, null, it1, notificationUrl, it2)
+                }
+            }
+        }
+
+        requiredParamsMap = request?.let { requiredParameters.getRequiredParametersForRequest(it) }
+
+        validator = RequiredParametersValidator(requiredParamsMap)
+        assertTrue(validator!!.isValidRequiredParams!!)
     }
 
     // Billing address params

@@ -119,22 +119,23 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         get() = URLConstants.CANCEL_URL
 
     @Throws(IllegalAccessException::class)
-    constructor(context: Context?, transactionId: String?, amount: BigDecimal?, currency: Currency, customerEmail: String?,
-                customerPhone: String?, billingAddress: PaymentAddress?, notificationUrl: String?,
-                transactionTypes: TransactionTypesRequest) : super() {
+    constructor(
+        context: Context?, transactionId: String?, amount: BigDecimal?, currency: Currency, customerEmail: String?,
+        customerPhone: String?, billingAddress: PaymentAddress?, notificationUrl: String?,
+        transactionTypes: TransactionTypesRequest) : super() {
 
         this.context = context
         this.transactionId = transactionId!!
         this.amount = amount
         this.currency = currency.currency
         this.exponent = currency.exponent
-        this.customerEmail = customerEmail!!
-        this.customerPhone = customerPhone!!
+        this.customerEmail = customerEmail?: ""
+        this.customerPhone = customerPhone?: ""
         this.paymentAddress = billingAddress
         this.transactionTypes = transactionTypes
 
         when {
-            notificationUrl != null && !notificationUrl.isEmpty() -> this.notificationUrl = notificationUrl
+            notificationUrl != null && notificationUrl.isNotEmpty() -> this.notificationUrl = notificationUrl
         }
 
         // Init params
@@ -190,7 +191,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
 
         // Urls
         when {
-            notificationUrl != null && !notificationUrl!!.isEmpty() -> setNotificationUrl(notificationUrl!!)
+            notificationUrl != null && notificationUrl!!.isNotEmpty() -> setNotificationUrl(notificationUrl!!)
         }
 
         setReturnSuccessUrl(URLConstants.SUCCESS_URL)

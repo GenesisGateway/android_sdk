@@ -87,7 +87,6 @@ class RequiredParameters {
         requiredParamsMap[transactionTypes] = paymentRequest.transactionTypes.transactionTypesList.toString()
         requiredParamsMap[returnSuccessUrl] = paymentRequest.returnSuccessUrl
         requiredParamsMap[returnCancelUrl] = paymentRequest.returnCancelUrl
-        requiredParamsMap[customerEmail] = paymentRequest.customerEmail
         when {
             !paymentRequest.customerEmail.isNullOrBlank()
                     && paymentRequest.consumerId?.isEmpty() == true ->
@@ -108,7 +107,6 @@ class RequiredParameters {
         const val returnSuccessUrl = "return_success_url"
         const val returnFailureUrl = "return_failure_url"
         const val returnCancelUrl = "return_cancel_url"
-        const val customerEmail = "customer_email"
         const val consumerId = "consumer_id"
         const val billingAddress = "billing_address"
         const val shippingAddress = "shipping_address"
@@ -120,10 +118,6 @@ class RequiredParameters {
         const val lifetime = "lifetime"
         const val firstName = "firstname"
         const val lastName = "lastname"
-        const val address1 = "address1"
-        const val address2 = "address2"
-        const val zipCode = "zip_code"
-        const val city = "city"
         const val country = "country"
         const val state = "state"
         const val customerAccountId = "customer_account_id"
