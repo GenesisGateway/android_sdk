@@ -3,6 +3,8 @@ package com.emerchantpay.gateway.genesisandroid.validation
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.KlarnaItemTypes
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringCategory
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringType
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.RequiredParameters
@@ -60,8 +62,8 @@ class RequiredParametersValidatorUnitTest {
 
         // Address
         billingAddress = PaymentAddress("John", "Doe",
-                "address1", "", "10000", "New York",
-                "state", Country().getCountry("United States")!!)
+            "address1", "", "10000", "New York",
+            "state", Country().getCountry("United States")!!)
 
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
@@ -71,7 +73,7 @@ class RequiredParametersValidatorUnitTest {
         // Payment request
         request = context?.let {
             PaymentRequest(it, transactionId!!, amount!!, Currency.USD,
-                    customerEmail!!, customerPhone!!, billingAddress!!, notificationUrl, transactionTypes!!)
+                customerEmail!!, customerPhone!!, billingAddress!!, notificationUrl, transactionTypes!!)
         }
 
         request!!.consumerId = "123456"
@@ -102,7 +104,7 @@ class RequiredParametersValidatorUnitTest {
             billingAddress?.let { it1 ->
                 transactionTypes?.let { it2 ->
                     PaymentRequest(it, transactionId, amount, Currency.USD,
-                            customerEmail, customerPhone, it1, notificationUrl, it2)
+                        customerEmail, customerPhone, it1, notificationUrl, it2)
                 }
             }
         }
@@ -151,8 +153,8 @@ class RequiredParametersValidatorUnitTest {
     fun testWithMissingAddressParams() {
         // Address
         billingAddress = PaymentAddress("John", "Doe",
-                "", "", "", "",
-                "", Country().getCountry("United States")!!)
+            "", "", "", "",
+            "", Country().getCountry("United States")!!)
 
         requiredParamsMap = requiredParameters.getRequiredParametersForAddress(billingAddress!!)
 
@@ -177,7 +179,7 @@ class RequiredParametersValidatorUnitTest {
                         customerEmail?.let { it4 ->
                             customerPhone?.let { it5 ->
                                 PaymentRequest(it1, it2, it3, Currency.USD,
-                                        it4, it5, it, notificationUrl, transactionTypes!!)
+                                    it4, it5, it, notificationUrl, transactionTypes!!)
                             }
                         }
                     }
@@ -203,7 +205,7 @@ class RequiredParametersValidatorUnitTest {
 
         // Payment request
         request = PaymentRequest(context, transactionId, amount, Currency.USD,
-                customerEmail, customerPhone, billingAddress, notificationUrl, transactionTypes!!)
+            customerEmail, customerPhone, billingAddress, notificationUrl, transactionTypes!!)
 
         var map: HashMap<String, String>
 
@@ -225,7 +227,7 @@ class RequiredParametersValidatorUnitTest {
 
         // Payment request
         request = PaymentRequest(context, transactionId, amount, Currency.USD,
-                customerEmail, customerPhone, billingAddress, notificationUrl, transactionTypes!!)
+            customerEmail, customerPhone, billingAddress, notificationUrl, transactionTypes!!)
 
         request!!.rememberCard = true
 
@@ -244,7 +246,7 @@ class RequiredParametersValidatorUnitTest {
     @Test
     fun testWithKlarnaItems() {
         val item = KlarnaItem("TICKET", KlarnaItemTypes.DISCOUNT, 10,
-                BigDecimal(10.00), BigDecimal(2.00))
+            BigDecimal(10.00), BigDecimal(2.00))
 
         request!!.addKlarnaItem(item)
 
@@ -257,7 +259,7 @@ class RequiredParametersValidatorUnitTest {
     @Test
     fun testWithMissingKlarnaItems() {
         val item = KlarnaItem("", KlarnaItemTypes.DISCOUNT, 10,
-                BigDecimal(10.00), BigDecimal(2.00))
+            BigDecimal(10.00), BigDecimal(2.00))
 
         request!!.addKlarnaItem(item)
 

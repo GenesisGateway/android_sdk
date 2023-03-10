@@ -2,12 +2,13 @@ package com.emerchantpay.gateway.genesisandroid.api.internal.request
 
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.recurring.CommonManagedRecurringAttributes
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
 import com.emerchantpay.gateway.genesisandroid.api.util.Request
 import com.emerchantpay.gateway.genesisandroid.api.util.RequestBuilderWithAttribute
 import java.util.*
 
-class TransactionTypesRequest : Request {
+class TransactionTypesRequest : Request, CommonManagedRecurringAttributes {
 
     private var parent: PaymentRequest? = null
     val transactionTypesList = ArrayList<String>()
@@ -97,6 +98,13 @@ class TransactionTypesRequest : Request {
         return buildRequest(root).toQueryString()
     }
 
+    private fun isManagedRecurringEnabled(): Boolean {
+        return (transactionTypesList.contains(WPFTransactionTypes.AUTHORIZE.value)
+                || transactionTypesList.contains(WPFTransactionTypes.AUTHORIZE3D.value)
+                || transactionTypesList.contains(WPFTransactionTypes.SALE.value)
+                || transactionTypesList.contains(WPFTransactionTypes.SALE3D.value))
+    }
+
     protected fun buildRequest(root: String): RequestBuilderWithAttribute {
 
         val builder = RequestBuilderWithAttribute(root, "")
@@ -104,6 +112,9 @@ class TransactionTypesRequest : Request {
         customAttributesList.forEach { attribute ->
             builder.addElement("", attribute)
         }
+
+        if (isManagedRecurringEnabled())
+                builder!!.addElement("managed_recurring", buildManagedRecurringAttributes())
 
         return builder
     }

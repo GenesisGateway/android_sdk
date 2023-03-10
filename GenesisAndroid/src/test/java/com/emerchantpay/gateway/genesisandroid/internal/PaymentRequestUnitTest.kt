@@ -3,6 +3,8 @@ package com.emerchantpay.gateway.genesisandroid.internal
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringCategory
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringType
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.models.*
@@ -35,8 +37,8 @@ class PaymentRequestUnitTest {
 
         // Address
         address = PaymentAddress("John", "Doe", "Berlin street 1",
-                "Berlin street 1", "10000", "Berlin",
-                "Berlin state", Country.Germany)
+            "Berlin street 1", "10000", "Berlin",
+            "Berlin state", Country.Germany)
 
         // Transaction types
         // Create Transaction types
@@ -45,9 +47,9 @@ class PaymentRequestUnitTest {
 
         // Payment paymentRequest
         paymentRequest = PaymentRequest(context!!, uniqueId,
-                BigDecimal("2.00"), Currency.USD,
-                "john@example.com", "+55555555", address!!,
-                "https://example.com", transactionTypes!!)
+            BigDecimal("2.00"), Currency.USD,
+            "john@example.com", "+55555555", address!!,
+            "https://example.com", transactionTypes!!)
 
         paymentRequest?.setConsumerId("123456")
     }
@@ -121,9 +123,9 @@ class PaymentRequestUnitTest {
             address?.let { it1 ->
                 transactionTypes?.let { it2 ->
                     PaymentRequest(it, uniqueId,
-                            BigDecimal("2.00"), Currency.USD,
-                            "john@example.com", "+55555555", it1,
-                            "", it2)
+                        BigDecimal("2.00"), Currency.USD,
+                        "john@example.com", "+55555555", it1,
+                        "", it2)
                 }
             }
         }
@@ -168,8 +170,8 @@ class PaymentRequestUnitTest {
     @Test
     fun testRemindersSuccess() {
         paymentRequest!!.setPayLater(true)
-                .addReminder(ReminderConstants.REMINDERS_CHANNEL_EMAIL, 1)
-                .addReminder(ReminderConstants.REMINDERS_CHANNEL_SMS, 1).done()
+            .addReminder(ReminderConstants.REMINDERS_CHANNEL_EMAIL, 1)
+            .addReminder(ReminderConstants.REMINDERS_CHANNEL_SMS, 1).done()
 
         assertNotNull(paymentRequest!!.reminders)
     }
@@ -177,12 +179,26 @@ class PaymentRequestUnitTest {
     @Test
     fun testRemindersFailure() {
         paymentRequest!!.setPayLater(true)
-                .addReminder("test", 1).done()
+            .addReminder("test", 1).done()
         assertEquals(paymentRequest!!.reminders.remindersList, ArrayList<Reminder>())
     }
 
     @Test
     fun testBuildRequest() {
         assertEquals(paymentRequest!!.toXML(), paymentRequest!!.request.toXML())
+    }
+
+    @Test
+    fun testWithoutRecurringParams() {
+        mockParams()
+        paymentRequest!!.isValidData?.let { assertTrue(it) }
+    }
+
+
+    @Test
+    fun testRecurringParams() {
+        paymentRequest?.setRecurringType(RecurringType.INITIAL)
+        paymentRequest?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
+        paymentRequest!!.isValidData?.let { assertTrue(it) }
     }
 }

@@ -4,6 +4,8 @@ import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringCategory
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringType
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
@@ -244,6 +246,19 @@ class GenesisValidatorUnitTest {
 
     @Test
     fun testIsValidData() {
+        assertTrue(request?.let { validator!!.isValidRequest(it) }!!)
+    }
+
+    @Test
+    fun testValidDataWithoutRecurring() {
+        setup()
+        assertTrue(request?.let { validator!!.isValidRequest(it) }!!)
+    }
+
+    @Test
+    fun testValidDataWithRecurring() {
+        request?.setRecurringType(RecurringType.INITIAL)
+        request?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
         assertTrue(request?.let { validator!!.isValidRequest(it) }!!)
     }
 }

@@ -143,7 +143,7 @@ open class GenesisValidator {
                             val errorMessage = requiredParametersValidator!!.error!!.message
                             val errorTechnicalMessage = requiredParametersValidator!!.error!!.technicalMessage
                             error = GenesisError("is required for $transactionType transaction type",
-                                    "$errorTechnicalMessage parameter ")
+                                "$errorTechnicalMessage parameter ")
                         }
                     }
                 }
@@ -160,7 +160,7 @@ open class GenesisValidator {
                              orderTaxAmount: BigDecimal?): Boolean? {
         when {
             klarnaRequest != null -> requiredParametersValidator = RequiredParametersValidator(requiredParameters
-                    .getRequiredParametersForKlarnaItem(klarnaRequest))
+                .getRequiredParametersForKlarnaItem(klarnaRequest))
             else -> {
                 error = GenesisError(ErrorMessages.REQUIRED_PARAMS, "items")
                 return false
@@ -209,7 +209,7 @@ open class GenesisValidator {
     fun isValidAddress(address: PaymentAddress): Boolean? {
         // Init Required Params Validator
         requiredParametersValidator = RequiredParametersValidator(requiredParameters
-                .getRequiredParametersForAddress(address))
+            .getRequiredParametersForAddress(address))
 
         return requiredParametersValidator!!.isValidRequiredParams!!
     }
@@ -259,9 +259,9 @@ open class GenesisValidator {
     companion object {
         // Regular expressions
         val VALID_EMAIL_REGEX = Pattern
-                .compile("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}", Pattern.CASE_INSENSITIVE)
+            .compile("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}", Pattern.CASE_INSENSITIVE)
         val VALID_PHONE_REGEX = Pattern.compile("^[0-9\\+]{1,}[0-9\\\\-]{3,15}$")
         val VALID_URL_REGEX = Pattern
-                .compile("\\b(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")
+            .compile("\\b(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")
     }
 }

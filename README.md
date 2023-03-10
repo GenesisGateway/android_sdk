@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.3.3'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.3.4'
 }
 ```
 
@@ -460,6 +460,58 @@ ThreeDsV2RecurringParams recurring=new ThreeDsV2RecurringParams()
 ThreeDsV2Params threeDsV2Params=threeDsV2ParamsBuilder.build();
         
 paymentRequest.setThreeDsV2Params(threeDsV2Params);
+```
+
+Set Recurring Params
+
+```kotlin
+ // Create Transaction types
+val transactionTypes = TransactionTypesRequest()
+transactionTypes.addTransaction(WPFTransactionTypes.SALE)
+
+transactionTypes.setMode(RecurringMode.AUTOMATIC)
+        .setInterval(RecurringInterval.DAYS)
+        .setFirstDate(FIRST_DATE)
+        .setTimeOfDay(7)
+        .setPeriod(7)
+        .setAmount(500)
+        .setMaxCount(10)
+
+ // Init WPF API request
+val paymentRequest = PaymentRequest(this, uniqueId,
+        BigDecimal("2.00"), Currency.USD,
+        "john@example.com", "+555555555", billingAddress,
+        "https://example.com", transactionTypes)
+
+paymentRequest?.setRecurringType(RecurringType.INITIAL)
+paymentRequest?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
+
+// ...
+```
+
+```java
+// Create Transaction types
+TransactionTypesRequest transactionTypes = new TransactionTypesRequest();
+transactionTypes.addTransaction(WPFTransactionTypes.SALE);
+
+transactionTypes.setMode(RecurringMode.AUTOMATIC)
+        .setInterval(RecurringInterval.DAYS)
+        .setFirstDate(FIRST_DATE)
+        .setTimeOfDay(7)
+        .setPeriod(7)
+        .setAmount(500)
+        .setMaxCount(10);
+
+// Init WPF API request
+PaymentRequest paymentRequest = new PaymentRequest(this, uniqueId,
+        new BigDecimal("2.00"), new Currency().Companion.getUSD(),
+        "john@example.com", "+555555555", billingAddress,
+        "https://example.com", transactionTypes);
+
+paymentRequest.setRecurringType(RecurringType.INITIAL);
+paymentRequest.setRecurringCategory(RecurringCategory.SUBSCRIPTION);
+
+// ...
 ```
 
 

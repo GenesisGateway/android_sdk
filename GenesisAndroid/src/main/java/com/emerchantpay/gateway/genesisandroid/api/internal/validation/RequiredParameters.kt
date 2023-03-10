@@ -49,7 +49,7 @@ class RequiredParameters {
                     else -> ""
                 }
                 requiredParamsMap[customerGender] = when {
-                    transactionParams[orderTaxAmount] != null -> transactionParams[customerGender].toString()
+                    transactionParams[customerGender] != null -> transactionParams[customerGender].toString()
                     else -> ""
                 }
                 return requiredParamsMap
@@ -80,6 +80,7 @@ class RequiredParameters {
         return requiredParamsMap
     }
 
+
     fun getRequiredParametersForRequest(paymentRequest: PaymentRequest): HashMap<String, String>? {
         requiredParamsMap[transactionId] = paymentRequest.transactionId
         requiredParamsMap[amount] = paymentRequest.amount.toString()
@@ -87,11 +88,11 @@ class RequiredParameters {
         requiredParamsMap[transactionTypes] = paymentRequest.transactionTypes.transactionTypesList.toString()
         requiredParamsMap[returnSuccessUrl] = paymentRequest.returnSuccessUrl
         requiredParamsMap[returnCancelUrl] = paymentRequest.returnCancelUrl
-        when {
-            !paymentRequest.customerEmail.isNullOrBlank()
-                    && paymentRequest.consumerId?.isEmpty() == true ->
-                requiredParamsMap[consumerId] = paymentRequest.consumerId as String
-        }
+
+        if (!paymentRequest.customerEmail.isNullOrBlank()
+            && paymentRequest.consumerId?.isEmpty() == true)
+            requiredParamsMap[consumerId] = paymentRequest.consumerId as String
+
         requiredParamsMap[notificationUrl] = paymentRequest.notificationUrl
         requiredParamsMap[billingAddress] = paymentRequest.getBillingAddress().toXML()
 
@@ -107,7 +108,9 @@ class RequiredParameters {
         const val returnSuccessUrl = "return_success_url"
         const val returnFailureUrl = "return_failure_url"
         const val returnCancelUrl = "return_cancel_url"
+        const val customerEmail = "customer_email"
         const val consumerId = "consumer_id"
+        const val customerPhone = "customer_phone"
         const val billingAddress = "billing_address"
         const val shippingAddress = "shipping_address"
         const val notificationUrl = "notification_url"
@@ -118,6 +121,10 @@ class RequiredParameters {
         const val lifetime = "lifetime"
         const val firstName = "firstname"
         const val lastName = "lastname"
+        const val address1 = "address1"
+        const val address2 = "address2"
+        const val zipCode = "zip_code"
+        const val city = "city"
         const val country = "country"
         const val state = "state"
         const val customerAccountId = "customer_account_id"
@@ -128,6 +135,7 @@ class RequiredParameters {
         const val cardType = "card_type"
         const val redeemType = "redeem_type"
 
+
         // Klarna
         const val orderTaxAmount = "order_tax_amount"
         const val customerGender = "customer_gender"
@@ -137,5 +145,8 @@ class RequiredParameters {
         const val quantity = "quantity"
         const val unitPrice = "unitPrice"
         const val totalAmount = "total_amount"
+
+        // Managed recurring
+        const val managedRecurring = "managed_recurring"
     }
 }

@@ -4,6 +4,8 @@ import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringCategory
+import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringType
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.BaseAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.RiskParamsAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.customerinfo.CustomerInfoAttributes
@@ -118,11 +120,14 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     val returnCancelUrl: String
         get() = URLConstants.CANCEL_URL
 
+    // Recurring
+    private var recurringType: String? = null
+    private var recurringCategory: String? = null
+
     @Throws(IllegalAccessException::class)
-    constructor(
-        context: Context?, transactionId: String?, amount: BigDecimal?, currency: Currency, customerEmail: String?,
-        customerPhone: String?, billingAddress: PaymentAddress?, notificationUrl: String?,
-        transactionTypes: TransactionTypesRequest) : super() {
+    constructor(context: Context?, transactionId: String?, amount: BigDecimal?, currency: Currency, customerEmail: String?,
+                customerPhone: String?, billingAddress: PaymentAddress?, notificationUrl: String?,
+                transactionTypes: TransactionTypesRequest) : super() {
 
         this.context = context
         this.transactionId = transactionId!!
@@ -135,7 +140,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         this.transactionTypes = transactionTypes
 
         when {
-            notificationUrl != null && notificationUrl.isNotEmpty() -> this.notificationUrl = notificationUrl
+            notificationUrl != null && notificationUrl.isNotBlank() -> this.notificationUrl = notificationUrl
         }
 
         // Init params
@@ -381,6 +386,14 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         return reminders.addReminder(channel, after)
     }
 
+    fun setRecurringType(recurringType: RecurringType) {
+        this.recurringType = recurringType.value
+    }
+
+    fun setRecurringCategory(recurringCategory: RecurringCategory) {
+        this.recurringCategory = recurringCategory.value
+    }
+
     override fun toXML(): String {
         return buildRequest("wpf_payment")!!.toXML()
     }
@@ -415,6 +428,20 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                     .addElement("threeds_v2_params", buildThreeDsV2Attributes().toXML())
                     .addElement("dynamic_descriptor_params", buildDescriptorParams().toXML())
 
+                val transactionTypesList = transactionTypes.transactionTypesList
+
+                if (transactionTypesList.contains("authorize")
+                    || transactionTypesList.contains("authorize3d")
+                    || transactionTypesList.contains("sale")
+                    || transactionTypesList.contains("sale3d")) {
+                    recurringType?.let {
+                        paymentRequestBuilder?.addElement("recurring_type", it)
+                    }
+                    recurringCategory?.let {
+                        paymentRequestBuilder?.addElement("recurring_category", it)
+                    }
+                }
+                
                 consumerId = getConsumerId()
 
                 when {
