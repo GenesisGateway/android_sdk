@@ -6,11 +6,12 @@ import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringCategory
 import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringType
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.googlepay.definitions.GooglePayPaymentSubtype
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
-import com.emerchantpay.gateway.genesisandroid.api.models.*
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency
+import com.emerchantpay.gateway.genesisandroid.api.models.*
 import io.mockk.mockk
 import org.junit.Assert.*
 import org.junit.Before
@@ -49,7 +50,11 @@ class GenesisValidatorUnitTest {
     @Before
     @Throws(IllegalAccessException::class)
     fun setup() {
-        context = mockk<Context>(relaxed = true)
+        createPaymentRequest(listOf(WPFTransactionTypes.AUTHORIZE, WPFTransactionTypes.EZEEWALLET))
+    }
+
+    private fun createPaymentRequest(transactions: List<WPFTransactionTypes>) {
+        context = mockk(relaxed = true)
         validator = GenesisValidator()
 
         // Intitial params
@@ -64,21 +69,19 @@ class GenesisValidatorUnitTest {
 
         // Address
         billingAddress = PaymentAddress("John", "Doe",
-                "address1", "", "10000", "New York",
-                "state", Country().getCountry("United States")!!)
+            "address1", "", "10000", "New York",
+            "state", Country().getCountry("United States")!!)
 
         // Transaction types list
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.AUTHORIZE)
-        transactionTypes!!.addTransaction(WPFTransactionTypes.EZEEWALLET)
+        transactions.forEach { transactionTypes!!.addTransaction(it) }
 
         // Payment request
         request = context?.let {
             PaymentRequest(it, transactionId!!, amount!!, Currency.USD,
-                    customerEmail!!, customerPhone!!, billingAddress!!, notificationUrl, transactionTypes!!)
+                customerEmail!!, customerPhone!!, billingAddress!!, notificationUrl, transactionTypes!!)
         }
     }
-
 
     // Transaction Id
     @Test
@@ -259,6 +262,14 @@ class GenesisValidatorUnitTest {
     fun testValidDataWithRecurring() {
         request?.setRecurringType(RecurringType.INITIAL)
         request?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
+        assertTrue(request?.let { validator!!.isValidRequest(it) }!!)
+    }
+
+    @Test
+    fun testValidDataWithGooglePayTransaction() {
+        createPaymentRequest(listOf(WPFTransactionTypes.GOOGLE_PAY))
+
+        request?.setGooglePayPaymentSubtype(GooglePayPaymentSubtype.INIT_RECURRING_SALE)
         assertTrue(request?.let { validator!!.isValidRequest(it) }!!)
     }
 }

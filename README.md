@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.3.4'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.3.5'
 }
 ```
 
@@ -320,30 +320,30 @@ Set usage, description, lifetime
 
 ```kotlin
 paymentRequest.setUsage("TICKETS")
-        paymentRequest.setDescription("Description")
-        paymentRequest.setLifetime(60)
+paymentRequest.setDescription("Description")
+paymentRequest.setLifetime(60)
 ```
 
 ```java
-paymentRequest.setUsage("TICKETS")
-        paymentRequest.setDescription("Description")
-        paymentRequest.setLifetime(60);
+paymentRequest.setUsage("TICKETS");
+paymentRequest.setDescription("Description");
+paymentRequest.setLifetime(60);
 ```
 
 Set shipping address
 
 ```kotlin
-val shippingAddress = PaymentAddress("John", "Doe",
-                "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
-                "Washington", Country.UnitedStates)
+val shippingAddress = PaymentAddress("John", "Doe", 
+    "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
+    "Washington", Country.UnitedStates)
 
 paymentRequest.setShippingAddress(shippingAddress)
 ```
 
 ```java
 PaymentAddress shippingAddress = nnew PaymentAddress("John", "Doe",
-                "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
-                "Washington", new Country().Companion.getUnitedStates(););
+        "Fifth avenue 1", "Fifth avenue 1", "10000", "New York",
+        "Washington", new Country().Companion.getUnitedStates());
 
 paymentRequest.setShippingAddress(shippingAddress);
 ```
@@ -353,12 +353,12 @@ Set Risk Params
 ```kotlin
 // Risk params
 val riskParams = RiskParams("1002547", "1DA53551-5C60-498C-9C18-8456BDBA74A9",
-                "987-65-4320", "12-34-56-78-9A-BC", "123456",
-                "emil@example.com", "+49301234567", "245.253.2.12",
-                "10000000000", "1234", "100000000", "John",
-                "Doe", "US", "test", "245.25 3.2.12",
-                "test", "test123456", "Bin name",
-                "+49301234567")
+    "987-65-4320", "12-34-56-78-9A-BC", "123456",
+    "emil@example.com", "+49301234567", "245.253.2.12",
+    "10000000000", "1234", "100000000", "John",
+    "Doe", "US", "test", "245.25 3.2.12",
+    "test", "test123456", "Bin name",
+    "+49301234567")
 
 paymentRequest.setRiskParams(riskParams)
 ```
@@ -366,12 +366,12 @@ paymentRequest.setRiskParams(riskParams)
 ```java
 // Risk params
 RiskParams riskParams = new RiskParams("1002547", "1DA53551-5C60-498C-9C18-8456BDBA74A9",
-                "987-65-4320", "12-34-56-78-9A-BC", "123456",
-                "emil@example.com", "+49301234567", "245.253.2.12",
-                "10000000000", "1234", "100000000", "John",
-                "Doe", "US", "test", "245.25 3.2.12",
-                "test", "test123456", "Bin name",
-                "+49301234567");
+        "987-65-4320", "12-34-56-78-9A-BC", "123456",
+        "emil@example.com", "+49301234567", "245.253.2.12",
+        "10000000000", "1234", "100000000", "John",
+        "Doe", "US", "test", "245.25 3.2.12",
+        "test", "test123456", "Bin name",
+        "+49301234567");
 
 paymentRequest.setRiskParams(riskParams);
 ```
@@ -465,7 +465,7 @@ paymentRequest.setThreeDsV2Params(threeDsV2Params);
 Set Recurring Params
 
 ```kotlin
- // Create Transaction types
+// Create Transaction types
 val transactionTypes = TransactionTypesRequest()
 transactionTypes.addTransaction(WPFTransactionTypes.SALE)
 
@@ -477,7 +477,7 @@ transactionTypes.setMode(RecurringMode.AUTOMATIC)
         .setAmount(500)
         .setMaxCount(10)
 
- // Init WPF API request
+// Init WPF API request
 val paymentRequest = PaymentRequest(this, uniqueId,
         BigDecimal("2.00"), Currency.USD,
         "john@example.com", "+555555555", billingAddress,
@@ -514,6 +514,39 @@ paymentRequest.setRecurringCategory(RecurringCategory.SUBSCRIPTION);
 // ...
 ```
 
+Set Google Pay
+
+```kotlin
+// Create Transaction types and add Google Pay transaction
+val transactionTypes = TransactionTypesRequest()
+transactionTypes.addTransaction(WPFTransactionTypes.GOOGLE_PAY)
+
+// Init WPF API request
+val paymentRequest = PaymentRequest(this, uniqueId,
+    BigDecimal("2.00"), Currency.USD,
+    "john@example.com", "+555555555", billingAddress,
+    "https://example.com", transactionTypes)
+
+// Add Google Pay transaction subtype (one of GooglePayPaymentSubtype.AUTHORIZE, 
+// GooglePayPaymentSubtype.SALE or GooglePayPaymentSubtype.INIT_RECURRING_SALE) 
+paymentRequest?.setGooglePayPaymentSubtype(GooglePayPaymentSubtype.SALE)
+```
+
+```java
+// Create Transaction types and add Google Pay transaction
+TransactionTypesRequest transactionTypes = new TransactionTypesRequest();
+transactionTypes.addTransaction(WPFTransactionTypes.GOOGLE_PAY);
+
+// Init WPF API request
+PaymentRequest paymentRequest = new PaymentRequest(this, uniqueId,
+    new BigDecimal("2.00"), new Currency().Companion.getUSD(),
+    "john@example.com", "+555555555", billingAddress,
+    "https://example.com", transactionTypes);
+
+// Add Google Pay transaction subtype (one of GooglePayPaymentSubtype.AUTHORIZE, 
+// GooglePayPaymentSubtype.SALE or GooglePayPaymentSubtype.INIT_RECURRING_SALE) 
+paymentRequest.setGooglePayPaymentSubtype(GooglePayPaymentSubtype.SALE);
+```
 
 Running Tests
 --------------

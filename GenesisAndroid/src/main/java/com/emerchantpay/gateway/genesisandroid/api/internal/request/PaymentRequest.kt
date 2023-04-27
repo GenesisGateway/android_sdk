@@ -10,8 +10,10 @@ import com.emerchantpay.gateway.genesisandroid.api.interfaces.BaseAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.RiskParamsAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.customerinfo.CustomerInfoAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.AsyncAttributes
-import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.DescriptorAttributes
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.DynamicDescriptorAttributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.PaymentAttributes
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.googlepay.GooglePayAttributes
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.googlepay.definitions.GooglePayPaymentSubtype
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.threedsv2.ThreeDsV2Attributes
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.threedsv2.definitions.ThreeDsV2ControlDeviceType
 import com.emerchantpay.gateway.genesisandroid.api.internal.validation.GenesisValidator
@@ -28,8 +30,8 @@ import java.math.MathContext
 import java.util.*
 import kotlin.math.pow
 
-open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, DescriptorAttributes,
-    AsyncAttributes, RiskParamsAttributes, ThreeDsV2Attributes {
+open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, DynamicDescriptorAttributes,
+    AsyncAttributes, RiskParamsAttributes, ThreeDsV2Attributes, GooglePayAttributes {
     // Request Builder
     private var paymentRequestBuilder: RequestBuilder? = null
 
@@ -107,6 +109,9 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                     "authorize3d", "sale3d", "init_recurring_sale3d" ->
                         validator?.isValidThreeDsV2Request(this)!! && validator?.isValidRequest(this)!!
 
+                    WPFTransactionTypes.GOOGLE_PAY.value ->
+                        validator?.isValidGooglePayRequest(this)!! && validator?.isValidRequest(this)!!
+
                     else -> validator?.isValidRequest(this)!!
                 }
             }
@@ -123,6 +128,9 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     // Recurring
     private var recurringType: String? = null
     private var recurringCategory: String? = null
+
+    // Google Pay
+    internal var googlePayPaymentSubtype: GooglePayPaymentSubtype? = null
 
     @Throws(IllegalAccessException::class)
     constructor(context: Context?, transactionId: String?, amount: BigDecimal?, currency: Currency, customerEmail: String?,
@@ -394,6 +402,11 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         this.recurringCategory = recurringCategory.value
     }
 
+    fun setGooglePayPaymentSubtype(googlePayPaymentSubtype: GooglePayPaymentSubtype?) {
+        this.googlePayPaymentSubtype = googlePayPaymentSubtype
+        googlePayPaymentSubtype?.let { setPaymentSubtype(it) }
+    }
+
     override fun toXML(): String {
         return buildRequest("wpf_payment")!!.toXML()
     }
@@ -425,10 +438,14 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                     .addElement("shipping_address", buildShippingAddress().toXML())
                     .addElement("transaction_types", transactionTypes)
                     .addElement("risk_params", buildRiskParams().toXML())
-                    .addElement("threeds_v2_params", buildThreeDsV2Attributes().toXML())
                     .addElement("dynamic_descriptor_params", buildDescriptorParams().toXML())
+                    .addElement(buildGooglePayParams().toXML())
 
                 val transactionTypesList = transactionTypes.transactionTypesList
+
+                if (canAddThreeDsV2Params(transactionTypesList)) {
+                    paymentRequestBuilder?.addElement("threeds_v2_params", buildThreeDsV2Attributes().toXML())
+                }
 
                 if (transactionTypesList.contains("authorize")
                     || transactionTypesList.contains("authorize3d")
@@ -467,6 +484,9 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
             else -> return RequestBuilder(root)
         }
     }
+
+    private fun canAddThreeDsV2Params(transactionTypesList: ArrayList<String>) =
+        transactionTypesList.none { it == WPFTransactionTypes.GOOGLE_PAY.value }
 
     fun getError(): GenesisError? {
         when {

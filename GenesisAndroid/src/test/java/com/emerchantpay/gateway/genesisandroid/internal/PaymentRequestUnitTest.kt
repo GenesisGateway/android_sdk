@@ -5,21 +5,29 @@ import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
 import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringCategory
 import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringType
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.googlepay.definitions.GooglePayPaymentSubtype
+import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.threedsv2.definitions.*
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.TransactionTypesRequest
-import com.emerchantpay.gateway.genesisandroid.api.models.*
+import com.emerchantpay.gateway.genesisandroid.api.models.Country
 import com.emerchantpay.gateway.genesisandroid.api.models.Currency
+import com.emerchantpay.gateway.genesisandroid.api.models.PaymentAddress
+import com.emerchantpay.gateway.genesisandroid.api.models.Reminder
+import com.emerchantpay.gateway.genesisandroid.api.models.threedsv2.ThreeDsV2CardHolderAccountParams
+import com.emerchantpay.gateway.genesisandroid.api.models.threedsv2.ThreeDsV2MerchantRiskParams
+import com.emerchantpay.gateway.genesisandroid.api.models.threedsv2.ThreeDsV2Params
+import com.emerchantpay.gateway.genesisandroid.api.models.threedsv2.ThreeDsV2RecurringParams
 import io.mockk.mockk
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
 import java.net.MalformedURLException
+import java.text.SimpleDateFormat
 import java.util.*
 
 
 class PaymentRequestUnitTest {
-
     private var context: Context? = null
 
     private var paymentRequest: PaymentRequest? = null
@@ -30,7 +38,11 @@ class PaymentRequestUnitTest {
     @Before
     @Throws(IllegalAccessException::class)
     fun mockParams() {
-        context = mockk<Context>(relaxed = true)
+        createPaymentRequest()
+    }
+
+    private fun createPaymentRequest(transactionType: WPFTransactionTypes = WPFTransactionTypes.SALE) {
+        context = mockk(relaxed = true)
 
         // Generate unique Id
         val uniqueId = UUID.randomUUID().toString()
@@ -43,7 +55,7 @@ class PaymentRequestUnitTest {
         // Transaction types
         // Create Transaction types
         transactionTypes = TransactionTypesRequest()
-        transactionTypes!!.addTransaction(WPFTransactionTypes.SALE)
+        transactionTypes!!.addTransaction(transactionType)
 
         // Payment paymentRequest
         paymentRequest = PaymentRequest(context!!, uniqueId,
@@ -52,6 +64,42 @@ class PaymentRequestUnitTest {
             "https://example.com", transactionTypes!!)
 
         paymentRequest?.setConsumerId("123456")
+
+        val threeDsV2Params = ThreeDsV2Params.build {
+            purchaseCategory = ThreeDsV2PurchaseCategory.GOODS
+
+            val merchantRiskPreorderDate = SimpleDateFormat("dd-MM-yyyy").calendar.apply {
+                time = Date()
+                add(Calendar.DATE, 5)
+            }.time
+
+            merchantRisk = ThreeDsV2MerchantRiskParams(
+                ThreeDsV2MerchantRiskShippingIndicator.DIGITAL_GOODS,
+                ThreeDsV2MerchantRiskDeliveryTimeframe.SAME_DAY,
+                ThreeDsV2MerchantRiskReorderItemsIndicator.REORDERED,
+                ThreeDsV2MerchantRiskPreorderPurchaseIndicator.MERCHANDISE_AVAILABLE,
+                merchantRiskPreorderDate,
+                true, 3
+            )
+
+            cardHolderAccount = ThreeDsV2CardHolderAccountParams(
+                SimpleDateFormat("dd-MM-yyyy").parse("11-02-2021"),
+                ThreeDsV2CardHolderAccountUpdateIndicator.UPDATE_30_TO_60_DAYS,
+                SimpleDateFormat("dd-MM-yyyy").parse("13-02-2021"),
+                ThreeDsV2CardHolderAccountPasswordChangeIndicator.PASSWORD_CHANGE_NO_CHANGE,
+                SimpleDateFormat("dd-MM-yyyy").parse("10-01-2021"),
+                ThreeDsV2CardHolderAccountShippingAddressUsageIndicator.ADDRESS_USAGE_MORE_THAN_60DAYS,
+                SimpleDateFormat("dd-MM-yyyy").parse("10-01-2021"),
+                2, 129, 1, 31,
+                ThreeDsV2CardHolderAccountSuspiciousActivityIndicator.NO_SUSPICIOUS_OBSERVED,
+                ThreeDsV2CardHolderAccountRegistrationIndicator.REGISTRATION_30_TO_60_DAYS,
+                SimpleDateFormat("dd-MM-yyyy").parse("03-01-2021")
+            )
+
+            recurring = ThreeDsV2RecurringParams()
+        }
+
+        paymentRequest?.setThreeDsV2Params(threeDsV2Params)
     }
 
     @Test
@@ -194,11 +242,37 @@ class PaymentRequestUnitTest {
         paymentRequest!!.isValidData?.let { assertTrue(it) }
     }
 
-
     @Test
     fun testRecurringParams() {
         paymentRequest?.setRecurringType(RecurringType.INITIAL)
         paymentRequest?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
         paymentRequest!!.isValidData?.let { assertTrue(it) }
+    }
+
+    @Test
+    fun testValidGooglePayTransactionRequest() {
+        createPaymentRequest(WPFTransactionTypes.GOOGLE_PAY)
+        paymentRequest?.setGooglePayPaymentSubtype(GooglePayPaymentSubtype.AUTHORIZE)
+
+        paymentRequest?.transactionTypes?.transactionTypesList?.any { it == WPFTransactionTypes.GOOGLE_PAY.value }
+            ?.let { assertTrue(it) }
+
+        paymentRequest?.toXML()?.let { it.run {
+            assertTrue(contains("payment_subtype"))
+            assertFalse(contains("threeds_v2_params"))
+        } }
+    }
+
+    @Test
+    fun testInvvalidGooglePayTransactionRequest() {
+        createPaymentRequest(WPFTransactionTypes.GOOGLE_PAY)
+
+        paymentRequest?.transactionTypes?.transactionTypesList?.any { it == WPFTransactionTypes.GOOGLE_PAY.value }
+            ?.let { assertTrue(it) }
+
+        paymentRequest?.isValidData?.let { assertFalse(it) }
+        paymentRequest?.toXML()?.let { it.run {
+            assertFalse(contains("payment_subtype"))
+        } }
     }
 }

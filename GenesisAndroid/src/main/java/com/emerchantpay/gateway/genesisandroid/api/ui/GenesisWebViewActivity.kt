@@ -62,7 +62,9 @@ open class GenesisWebViewActivity : Activity() {
     }
 
     fun popCurrentWebView() {
-        genesisWebViews?.pop()
+        if (genesisWebViews!!.size > 1)
+            genesisWebViews?.pop()
+
         genesisWebViews?.pop()?.let { pushNewWebView(it) }
     }
 
@@ -98,7 +100,7 @@ open class GenesisWebViewActivity : Activity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when {
             item.itemId == android.R.id.home -> {
-                setResult(Activity.RESULT_CANCELED)
+                setResult(RESULT_CANCELED)
                 finish()
                 return true
             }

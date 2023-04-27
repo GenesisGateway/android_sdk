@@ -1,6 +1,7 @@
 package com.emerchantpay.gateway.genesisandroid.api.internal.validation
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
+import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages.GOOGLE_PAY_MISSING_PAYMENT_SUBTYPE
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages.REQUIRED_PARAMS_THREE_DS_V2
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
@@ -245,6 +246,13 @@ open class GenesisValidator {
             }
             else -> true
         }
+    }
+
+    fun isValidGooglePayRequest(request: PaymentRequest): Boolean {
+        return if (request.googlePayPaymentSubtype == null) {
+            error = GenesisError(GOOGLE_PAY_MISSING_PAYMENT_SUBTYPE)
+            false
+        } else true
     }
 
     private fun isValidRegex(request: PaymentRequest): Boolean? {
