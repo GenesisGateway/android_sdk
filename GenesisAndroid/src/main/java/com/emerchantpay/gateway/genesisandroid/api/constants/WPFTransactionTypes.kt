@@ -16,8 +16,6 @@ enum class WPFTransactionTypes(val value: String) {
     SALE3D("sale3d"),
 
     // Card verification without any financial impact
-    ACCOUNT_VERIFICATION("account_verification"),
-
     // Payment using credit or debit cards connected to a consumer's Google account
     GOOGLE_PAY("google_pay"),
 

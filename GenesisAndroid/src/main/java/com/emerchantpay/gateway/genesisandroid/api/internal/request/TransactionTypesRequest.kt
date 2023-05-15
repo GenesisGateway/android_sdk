@@ -114,7 +114,7 @@ class TransactionTypesRequest : Request, CommonManagedRecurringAttributes {
         }
 
         if (isManagedRecurringEnabled())
-                builder!!.addElement("managed_recurring", buildManagedRecurringAttributes())
+                builder.addElement("managed_recurring", buildManagedRecurringAttributes().toXML())
 
         return builder
     }

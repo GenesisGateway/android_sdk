@@ -5,6 +5,7 @@ import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages.GOOGL
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages.REQUIRED_PARAMS_THREE_DS_V2
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes.*
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.KlarnaItemsRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
@@ -29,15 +30,10 @@ open class GenesisValidator {
     private var requiredParametersValidator: RequiredParametersValidator? = null
 
     // Validate amount
-    fun validateAmount(amount: BigDecimal?): Boolean? {
+    fun validateAmount(amount: BigDecimal?, transactionType: String?): Boolean? {
         return when {
-            amount!!.toDouble() > 0 && amount != null -> true
-            else -> {
-                error = GenesisError(ErrorMessages.INVALID_AMOUNT)
-                notValidParamsList.add(amount.toString())
-
-                false
-            }
+            permitZeroAmount(transactionType) -> amount?.let { validateZeroAmount(it) }
+            else -> amount?.let { validateNonZeroAmount(it) }
         }
     }
 
@@ -256,12 +252,43 @@ open class GenesisValidator {
     }
 
     private fun isValidRegex(request: PaymentRequest): Boolean? {
-        val isValidAmount = validateAmount(request.amount)
+        val isValidAmount = validateAmount(request.amount, request.getTransactionType())
         val isValidEmail = validateEmail(request.customerEmail)
         val isValidPhone = validatePhone(request.customerPhone)
         val isValidUrl = validateNotificationUrl(request.notificationUrl)
 
         return isValidAmount!! && isValidEmail!! && isValidPhone!! && isValidUrl!!
+    }
+
+    private fun permitZeroAmount(transactionType: String?): Boolean {
+        return transactionType == AUTHORIZE.value
+                || transactionType == AUTHORIZE3D.value
+                || transactionType == SALE.value
+                || transactionType == SALE3D.value
+    }
+
+    private fun validateNonZeroAmount(amount: BigDecimal): Boolean? {
+        return when {
+            amount != null && amount.toDouble() > 0 -> true
+            else -> {
+                error = GenesisError(ErrorMessages.INVALID_AMOUNT)
+                notValidParamsList.add(amount.toString())
+
+                false
+            }
+        }
+    }
+
+    private fun validateZeroAmount(amount: BigDecimal): Boolean? {
+        return when {
+            amount != null && amount.toDouble() >= 0  -> true
+            else -> {
+                error = GenesisError(ErrorMessages.INVALID_AMOUNT)
+                notValidParamsList.add(amount.toString())
+
+                false
+            }
+        }
     }
 
     companion object {

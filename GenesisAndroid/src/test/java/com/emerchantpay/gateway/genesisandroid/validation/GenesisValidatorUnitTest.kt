@@ -4,6 +4,7 @@ import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
 import com.emerchantpay.gateway.genesisandroid.api.constants.ReminderConstants
 import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes
+import com.emerchantpay.gateway.genesisandroid.api.constants.WPFTransactionTypes.*
 import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringCategory
 import com.emerchantpay.gateway.genesisandroid.api.constants.recurring.RecurringType
 import com.emerchantpay.gateway.genesisandroid.api.interfaces.financial.googlepay.definitions.GooglePayPaymentSubtype
@@ -50,7 +51,7 @@ class GenesisValidatorUnitTest {
     @Before
     @Throws(IllegalAccessException::class)
     fun setup() {
-        createPaymentRequest(listOf(WPFTransactionTypes.AUTHORIZE, WPFTransactionTypes.EZEEWALLET))
+        createPaymentRequest(listOf(AUTHORIZE, EZEEWALLET))
     }
 
     private fun createPaymentRequest(transactions: List<WPFTransactionTypes>) {
@@ -96,16 +97,33 @@ class GenesisValidatorUnitTest {
     // Amount
     @Test
     fun testAmountValidationSuccess() {
-        assertTrue(validator!!.validateAmount(amount)!!)
+        assertTrue(validator!!.validateAmount(amount, AUTHORIZE.value)!!)
 
         amount = BigDecimal("0.99")
-        assertTrue(validator!!.validateAmount(amount)!!)
+        assertTrue(validator!!.validateAmount(amount, AUTHORIZE.value)!!)
     }
 
     @Test
-    fun testAmountValidationFailed() {
+    fun testZeroAmountValidationSuccess() {
+        assertTrue(validator!!.validateAmount(amount, AUTHORIZE.value)!!)
+
         amount = BigDecimal("0.00")
-        assertFalse(validator!!.validateAmount(amount)!!)
+        assertTrue(validator!!.validateAmount(amount, AUTHORIZE.value)!!)
+    }
+
+    @Test
+    fun testAmountValidationFailedWithAuthorize() {
+        amount = BigDecimal("-1.00")
+        assertFalse(validator!!.validateAmount(amount, AUTHORIZE.value)!!)
+
+        error = GenesisError(ErrorMessages.INVALID_AMOUNT)
+        assertEquals(error!!.message, ErrorMessages.INVALID_AMOUNT)
+    }
+
+    @Test
+    fun testAmountValidationFailedWithGooglePay() {
+        amount = BigDecimal("0.00")
+        assertFalse(validator!!.validateAmount(amount, GOOGLE_PAY.value)!!)
 
         error = GenesisError(ErrorMessages.INVALID_AMOUNT)
         assertEquals(error!!.message, ErrorMessages.INVALID_AMOUNT)
@@ -194,7 +212,7 @@ class GenesisValidatorUnitTest {
     @Test
     @Throws(IllegalAccessException::class)
     fun testTransactionTypeValidionSuccess() {
-        assertTrue(validator!!.validateTransactionType(WPFTransactionTypes.AUTHORIZE.value)!!)
+        assertTrue(validator!!.validateTransactionType(AUTHORIZE.value)!!)
     }
 
     @Test
@@ -267,7 +285,7 @@ class GenesisValidatorUnitTest {
 
     @Test
     fun testValidDataWithGooglePayTransaction() {
-        createPaymentRequest(listOf(WPFTransactionTypes.GOOGLE_PAY))
+        createPaymentRequest(listOf(GOOGLE_PAY))
 
         request?.setGooglePayPaymentSubtype(GooglePayPaymentSubtype.INIT_RECURRING_SALE)
         assertTrue(request?.let { validator!!.isValidRequest(it) }!!)
