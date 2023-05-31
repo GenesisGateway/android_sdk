@@ -111,6 +111,7 @@ class HttpAsyncTask(private val configuration: Configuration?) : AsyncTask<Any, 
             } catch (unexpectedException: UnexpectedException) {
                 // TODO Auto-generated catch block
                 Log.e("Unexpected Exception", unexpectedException.toString())
+                throw UnexpectedException(e.message, e)
             }
 
         } finally {

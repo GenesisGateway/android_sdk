@@ -4,6 +4,11 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GenesisAndroid/GenesisAndroid.iml" filepath="$PROJECT_DIR$/GenesisAndroid/GenesisAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/android_sdk.iml" filepath="$PROJECT_DIR$/android_sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.iml" filepath="$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.main.iml" filepath="$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/GenesisAndroid/android_sdk.GenesisAndroid.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/githhub_android.android_sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/githhub_android.android_sdk.iml" />
     </modules>
   </component>
 </project>
