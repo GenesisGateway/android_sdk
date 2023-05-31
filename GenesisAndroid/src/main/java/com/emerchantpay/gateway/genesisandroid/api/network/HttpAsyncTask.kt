@@ -3,7 +3,6 @@ package com.emerchantpay.gateway.genesisandroid.api.network
 import android.os.AsyncTask
 import android.util.Log
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
-import com.emerchantpay.gateway.genesisandroid.api.exceptions.UnexpectedException
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
 import com.emerchantpay.gateway.genesisandroid.api.util.*
 import java.io.*
@@ -106,13 +105,7 @@ class HttpAsyncTask(private val configuration: Configuration?) : AsyncTask<Any, 
                  return null
             }
         } catch (e: IOException) {
-            try {
-                throw UnexpectedException(e.message, e)
-            } catch (unexpectedException: UnexpectedException) {
-                // TODO Auto-generated catch block
-                Log.e("Unexpected Exception", unexpectedException.toString())
-            }
-
+            GenesisError(connection?.responseCode, e.message.toString())
         } finally {
             connection?.disconnect()
         }
