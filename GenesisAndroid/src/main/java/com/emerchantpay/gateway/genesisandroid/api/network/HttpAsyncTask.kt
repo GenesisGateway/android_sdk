@@ -104,8 +104,8 @@ class HttpAsyncTask(private val configuration: Configuration?) : AsyncTask<Any, 
             if (requestMethod == RequestMethod.DELETE) {
                  return null
             }
-        } catch (e: IOException) {
-            GenesisError(connection?.responseCode, e.message.toString())
+        } catch (e: Exception) {
+            GenesisError(connection?.responseCode, e.message?: ErrorMessages.UNEXPECTED_HTTP_ERROR)
         } finally {
             connection?.disconnect()
         }

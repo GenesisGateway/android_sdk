@@ -11,7 +11,6 @@ import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
 import com.emerchantpay.gateway.genesisandroid.api.network.HttpAsyncTask
 import com.emerchantpay.gateway.genesisandroid.api.util.*
-import java.util.concurrent.ExecutionException
 
 open class GenesisClient : Request {
 
@@ -149,10 +148,8 @@ open class GenesisClient : Request {
                         && consumerId.isNotEmpty() -> sharedPrefs.putString(context, SharedPrefConstants.CONSUMER_ID,
                         KeyStoreUtil(context).encryptData(result?.transaction?.consumerId))
             }
-        } catch (e: InterruptedException) {
-            GenesisError(ErrorCodes.SYSTEM_ERROR.code, e.message.toString())
-        } catch (e: ExecutionException) {
-            GenesisError(ErrorCodes.SYSTEM_ERROR.code, e.message.toString())
+        } catch (e: Exception) {
+            GenesisError(ErrorCodes.SYSTEM_ERROR.code, e.message?: ErrorCodes.getErrorDescription(ErrorCodes.SYSTEM_ERROR.code?: 1))
         }
 
         return this
