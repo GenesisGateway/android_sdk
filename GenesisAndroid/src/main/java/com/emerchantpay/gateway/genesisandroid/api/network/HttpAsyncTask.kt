@@ -9,15 +9,18 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.KeyManagementException
+import java.security.KeyStore
 import java.security.NoSuchAlgorithmException
-import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.KeyManager
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
+import javax.security.cert.CertificateExpiredException
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
@@ -186,20 +189,50 @@ class HttpAsyncTask(private val configuration: Configuration?) : AsyncTask<Any, 
                 ?: throw IllegalArgumentException("not an HTTPS connection!")
     }
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, NoSuchAlgorithmException::class)
     fun getHttpURLConnection(url: URL, compatible: Boolean): HttpURLConnection {
-        val sslcontext: SSLContext
+        // Create a trust manager that does not validate certificate chains
+        val tmf = TrustManagerFactory.getInstance(
+            TrustManagerFactory.getDefaultAlgorithm()
+        )
+        // Initialise the TMF as you normally would, for example:
+        tmf.init(null as KeyStore?)
+
+        val trustManagers = tmf.trustManagers.toList()
+        val trustManager = trustManagers?.firstOrNull() as? X509TrustManager
+
+        trustManager?: throw NoSuchAlgorithmException("X509 trust manager not supported!")
+
+        val wrappedTrustManagers = arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun getAcceptedIssuers(): Array<X509Certificate> {
+                    return trustManager.acceptedIssuers
+                }
+
+                override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) {
+                    trustManager.checkClientTrusted(certs, authType)
+                }
+
+                override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) {
+                    try {
+                        trustManager.checkServerTrusted(certs, authType)
+                    } catch (e: CertificateExpiredException) {
+
+                    }
+                }
+            }
+        )
+
         try {
-            sslcontext = SSLContext.getInstance("TLSv1")
-            sslcontext.init(null as Array<KeyManager>?, null as Array<TrustManager>?, null as SecureRandom?)
+            val sslContext = SSLContext.getInstance("TLSv1.2")
+            sslContext.init(null, wrappedTrustManagers, null)
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.socketFactory)
         } catch (algorithmException: NoSuchAlgorithmException) {
             throw IllegalArgumentException(algorithmException)
         } catch (keymanagementException: KeyManagementException) {
             throw IllegalArgumentException(keymanagementException)
         }
 
-        val socketFactory = TLSSocketFactory(sslcontext.socketFactory, compatible)
-        HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory)
         return url.openConnection() as HttpURLConnection
     }
 

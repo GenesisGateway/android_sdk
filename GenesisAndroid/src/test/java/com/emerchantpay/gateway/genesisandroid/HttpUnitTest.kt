@@ -15,6 +15,7 @@ import javax.net.ssl.HttpsURLConnection
 
 import junit.framework.Assert.assertEquals
 import org.mockito.Mockito.mock
+import java.security.NoSuchAlgorithmException
 
 @Config(manifest = Config.NONE)
 class HttpUnitTest {
@@ -49,7 +50,7 @@ class HttpUnitTest {
     }
 
     @Test
-    @Throws(IOException::class)
+    @Throws(IOException::class, NoSuchAlgorithmException::class)
     fun testHttpsConnection() {
         val url = URL("https://google.com")
         val connection = url.openConnection() as HttpsURLConnection
