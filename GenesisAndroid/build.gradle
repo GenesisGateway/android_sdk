@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 
 ext {
     PUBLISH_GROUP_ID = 'com.emerchantpay.gateway'
-    PUBLISH_VERSION = '1.3.9'
+    PUBLISH_VERSION = '1.3.91'
     PUBLISH_ARTIFACT_ID = 'genesis-android'
     PUBLISH_DESCRIPTION = 'Genesis Android SDK'
     PUBLISH_URL = 'https://github.com/GenesisGateway/android_sdk'
@@ -27,7 +27,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 33
         versionCode 1
-        versionName "1.3.9"
+        versionName "1.3.91"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

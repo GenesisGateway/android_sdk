@@ -447,10 +447,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                     paymentRequestBuilder?.addElement("threeds_v2_params", buildThreeDsV2Attributes().toXML())
                 }
 
-                if (transactionTypesList.contains("authorize")
-                    || transactionTypesList.contains("authorize3d")
-                    || transactionTypesList.contains("sale")
-                    || transactionTypesList.contains("sale3d")) {
+                if (isRecurringEnabled(transactionTypesList)) {
                     recurringType?.let {
                         paymentRequestBuilder?.addElement("recurring_type", it)
                     }
@@ -546,6 +543,15 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
 
     override fun getTransactionType(): String? {
         return "wpf_payment"
+    }
+
+    private fun isRecurringEnabled(transactionTypesList: List<String>): Boolean {
+        return (transactionTypesList.contains(WPFTransactionTypes.AUTHORIZE.value)
+                || transactionTypesList.contains(WPFTransactionTypes.AUTHORIZE3D.value)
+                || transactionTypesList.contains(WPFTransactionTypes.SALE.value)
+                || transactionTypesList.contains(WPFTransactionTypes.SALE3D.value)
+                || transactionTypesList.contains(WPFTransactionTypes.INIT_RECURRING_SALE.value)
+                || transactionTypesList.contains(WPFTransactionTypes.INIT_RECURRING_SALE3D.value))
     }
 
     companion object {

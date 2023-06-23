@@ -15,6 +15,12 @@ enum class WPFTransactionTypes(val value: String) {
     // 3D-Secure Sale
     SALE3D("sale3d"),
 
+    // Standard initial recurring
+    INIT_RECURRING_SALE("init_recurring_sale"),
+
+    // 3D-based initial recurring
+    INIT_RECURRING_SALE3D("init_recurring_sale3d"),
+
     // Card verification without any financial impact
     // Payment using credit or debit cards connected to a consumer's Google account
     GOOGLE_PAY("google_pay"),
