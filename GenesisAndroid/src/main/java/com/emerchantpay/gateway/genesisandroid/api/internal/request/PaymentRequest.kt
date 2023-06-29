@@ -287,15 +287,6 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
 
     fun setConsumerId(consumerId: String): PaymentRequest {
         this.consumerId = consumerId
-        try {
-            context?.let {
-                sharedPreferences.putString(it, SharedPrefConstants.CONSUMER_ID,
-                        KeyStoreUtil(context!!).encryptData(consumerId))
-            }
-        } catch (e: Exception) {
-
-        }
-
         return this
     }
 
@@ -455,8 +446,9 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
                         paymentRequestBuilder?.addElement("recurring_category", it)
                     }
                 }
-                
-                consumerId = getConsumerId()
+
+                if (!isRecurringEnabled(transactionTypesList))
+                    addConsumerId()
 
                 when {
                     transactionTypes.transactionTypesList.contains(WPFTransactionTypes.KLARNA_AUTHORIZE.value) -> orderTaxAmount?.let {
@@ -517,24 +509,9 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
         return rememberCard!!
     }
 
-    fun getConsumerId(): String? {
-        try {
-            when {
-                consumerId != null && consumerId!!.isNotEmpty() ->
-                    paymentRequestBuilder!!.addElement(SharedPrefConstants.CONSUMER_ID, consumerId!!)
-                else -> {
-                    consumerId = context?.let {
-                        KeyStoreUtil(it)
-                                .decryptData(sharedPreferences.getString(context!!, SharedPrefConstants.CONSUMER_ID))
-                    }.toString()
-                    consumerId?.let { paymentRequestBuilder!!.addElement(SharedPrefConstants.CONSUMER_ID, it) }
-                }
-            }
-        } catch (e: Exception) {
-            consumerId = "0"
-        }
-
-        return consumerId
+    private fun addConsumerId() {
+        if (consumerId?.isNullOrBlank() == false)
+            paymentRequestBuilder!!.addElement(SharedPrefConstants.CONSUMER_ID, consumerId!!)
     }
 
     fun getKlarnaItemsRequest(paymentRequest: PaymentRequest): KlarnaItemsRequest? {
@@ -546,11 +523,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     }
 
     private fun isRecurringEnabled(transactionTypesList: List<String>): Boolean {
-        return (transactionTypesList.contains(WPFTransactionTypes.AUTHORIZE.value)
-                || transactionTypesList.contains(WPFTransactionTypes.AUTHORIZE3D.value)
-                || transactionTypesList.contains(WPFTransactionTypes.SALE.value)
-                || transactionTypesList.contains(WPFTransactionTypes.SALE3D.value)
-                || transactionTypesList.contains(WPFTransactionTypes.INIT_RECURRING_SALE.value)
+        return (transactionTypesList.contains(WPFTransactionTypes.INIT_RECURRING_SALE.value)
                 || transactionTypesList.contains(WPFTransactionTypes.INIT_RECURRING_SALE3D.value))
     }
 

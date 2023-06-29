@@ -128,7 +128,6 @@ open class GenesisClient : Request {
             }
 
             // Retrieve and store consumer id
-            val sharedPrefs = GenesisSharedPreferences()
             val result = this.transaction?.request
             var consumerId = result?.transaction?.consumerId
             when {
@@ -136,17 +135,7 @@ open class GenesisClient : Request {
                         && consumerId.isNullOrEmpty()
                         && !paymentRequest?.getCustomerEmail().isNullOrEmpty() -> {
                     consumerId = retrieveConsumerIdFromGenesisGateway(paymentRequest?.getCustomerEmail())
-                    when {
-                        !consumerId.isNullOrEmpty() ->
-                            sharedPrefs.putString(context, SharedPrefConstants.CONSUMER_ID,
-                                    KeyStoreUtil(context).encryptData(consumerId))
-                    }
                 }
-                sharedPrefs?.getString(context, SharedPrefConstants.CONSUMER_ID).isNullOrEmpty()
-                        && response?.isSuccess == true
-                        && consumerId != null
-                        && consumerId.isNotEmpty() -> sharedPrefs.putString(context, SharedPrefConstants.CONSUMER_ID,
-                        KeyStoreUtil(context).encryptData(result?.transaction?.consumerId))
             }
         } catch (e: Exception) {
             GenesisError(ErrorCodes.SYSTEM_ERROR.code, e.message?: ErrorCodes.getErrorDescription(ErrorCodes.SYSTEM_ERROR.code?: 1))
