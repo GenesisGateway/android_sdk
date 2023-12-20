@@ -244,9 +244,15 @@ class PaymentRequestUnitTest {
 
     @Test
     fun testRecurringParams() {
-        paymentRequest?.setRecurringType(RecurringType.INITIAL)
-        paymentRequest?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
+        paymentRequest?.transactionTypes?.customAttributes?.addAttribute("recurring_type", RecurringType.INITIAL.value)
+        paymentRequest?.transactionTypes?.customAttributes?.addAttribute("recurring_category", RecurringCategory.SUBSCRIPTION.value)
+
         paymentRequest!!.isValidData?.let { assertTrue(it) }
+        assertEquals(paymentRequest?.transactionTypes?.toXML(), paymentRequest?.transactionTypes?.request?.toXML())
+        paymentRequest?.transactionTypes?.toXML()?.let { it.run {
+            assertTrue(contains("recurring_type"))
+            assert(contains("recurring_category"))
+        } }
     }
 
     @Test
@@ -264,15 +270,17 @@ class PaymentRequestUnitTest {
     }
 
     @Test
-    fun testInvvalidGooglePayTransactionRequest() {
+    fun testInvalidGooglePayTransactionRequest() {
         createPaymentRequest(WPFTransactionTypes.GOOGLE_PAY)
 
         paymentRequest?.transactionTypes?.transactionTypesList?.any { it == WPFTransactionTypes.GOOGLE_PAY.value }
             ?.let { assertTrue(it) }
 
         paymentRequest?.isValidData?.let { assertFalse(it) }
-        paymentRequest?.toXML()?.let { it.run {
-            assertFalse(contains("payment_subtype"))
-        } }
+        paymentRequest?.toXML()?.let {
+            it.run {
+                assertFalse(contains("payment_subtype"))
+            }
+        }
     }
 }

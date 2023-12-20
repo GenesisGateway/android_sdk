@@ -384,15 +384,7 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
     fun addReminder(channel: String, after: Int?): RemindersRequest {
         return reminders.addReminder(channel, after)
     }
-
-    fun setRecurringType(recurringType: RecurringType) {
-        this.recurringType = recurringType.value
-    }
-
-    fun setRecurringCategory(recurringCategory: RecurringCategory) {
-        this.recurringCategory = recurringCategory.value
-    }
-
+    
     fun setGooglePayPaymentSubtype(googlePayPaymentSubtype: GooglePayPaymentSubtype?) {
         this.googlePayPaymentSubtype = googlePayPaymentSubtype
         googlePayPaymentSubtype?.let { setPaymentSubtype(it) }
@@ -440,10 +432,10 @@ open class PaymentRequest : Request, PaymentAttributes, CustomerInfoAttributes, 
 
                 if (isRecurringEnabled(transactionTypesList)) {
                     recurringType?.let {
-                        paymentRequestBuilder?.addElement("recurring_type", it)
+                        transactionTypes.customAttributes?.addAttribute("recurring_type", it)
                     }
                     recurringCategory?.let {
-                        paymentRequestBuilder?.addElement("recurring_category", it)
+                        transactionTypes.customAttributes?.addAttribute("recurring_category", it)
                     }
                 }
 

@@ -278,8 +278,8 @@ class GenesisValidatorUnitTest {
 
     @Test
     fun testValidDataWithRecurring() {
-        request?.setRecurringType(RecurringType.INITIAL)
-        request?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
+        request?.transactionTypes?.customAttributes?.addAttribute("recurring_type", RecurringType.INITIAL.value)
+        request?.transactionTypes?.customAttributes?.addAttribute("recurring_category", RecurringCategory.SUBSCRIPTION.value)
         assertTrue(request?.let { validator!!.isValidRequest(it) }!!)
     }
 

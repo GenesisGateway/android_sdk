@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.3.92'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.3.93'
 }
 ```
 
@@ -483,8 +483,8 @@ val paymentRequest = PaymentRequest(this, uniqueId,
         "john@example.com", "+555555555", billingAddress,
         "https://example.com", transactionTypes)
 
-paymentRequest?.setRecurringType(RecurringType.INITIAL)
-paymentRequest?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
+paymentRequest?.transactionTypes?.customAttributes?.addAttribute("recurring_type", RecurringType.INITIAL.value)
+paymentRequest?.transactionTypes?.customAttributes?.addAttribute("recurring_category", RecurringCategory.SUBSCRIPTION.value)
 
 // ...
 ```
@@ -492,8 +492,10 @@ paymentRequest?.setRecurringCategory(RecurringCategory.SUBSCRIPTION)
 ```java
 // Create Transaction types
 TransactionTypesRequest transactionTypes = new TransactionTypesRequest();
-transactionTypes.addTransaction(WPFTransactionTypes.SALE);
-
+        transactionTypes.addTransaction(WPFTransactionTypes.SALE)
+        .addParam("recurring_type", RecurringType.INITIAL.getValue())
+        .addParam("recurring_category", RecurringCategory.SUBSCRIPTION.getValue());
+        
 transactionTypes.setMode(RecurringMode.AUTOMATIC)
         .setInterval(RecurringInterval.DAYS)
         .setFirstDate(FIRST_DATE)
@@ -508,8 +510,6 @@ PaymentRequest paymentRequest = new PaymentRequest(this, uniqueId,
         "john@example.com", "+555555555", billingAddress,
         "https://example.com", transactionTypes);
 
-paymentRequest.setRecurringType(RecurringType.INITIAL);
-paymentRequest.setRecurringCategory(RecurringCategory.SUBSCRIPTION);
 
 // ...
 ```
