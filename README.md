@@ -14,7 +14,7 @@
 
 - JDK >= 1.8
 - Gradle >= 4.1
-- Android >=  4.4
+- Android >=  5.0 Lollipop
 - Android Studio >= 3.0
 
 Installation and Setup
@@ -31,7 +31,7 @@ cd GenesisAndroid
 * Add the dependency in your build.gradle:
 ```
 dependencies {
-  implementation 'com.emerchantpay.gateway:genesis-android:1.3.93'
+  implementation 'com.emerchantpay.gateway:genesis-android:1.3.94'
 }
 ```
 

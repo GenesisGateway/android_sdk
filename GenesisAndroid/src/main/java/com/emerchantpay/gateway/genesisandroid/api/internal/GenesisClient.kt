@@ -3,14 +3,15 @@ package com.emerchantpay.gateway.genesisandroid.api.internal
 import android.content.Context
 import com.emerchantpay.gateway.genesisandroid.api.constants.Endpoints
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorCodes
-import com.emerchantpay.gateway.genesisandroid.api.constants.SharedPrefConstants
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.PaymentRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.ReconcileRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.request.RetrieveConsumerRequest
 import com.emerchantpay.gateway.genesisandroid.api.internal.response.Response
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
 import com.emerchantpay.gateway.genesisandroid.api.network.HttpAsyncTask
-import com.emerchantpay.gateway.genesisandroid.api.util.*
+import com.emerchantpay.gateway.genesisandroid.api.util.Configuration
+import com.emerchantpay.gateway.genesisandroid.api.util.NodeWrapper
+import com.emerchantpay.gateway.genesisandroid.api.util.Request
 
 open class GenesisClient : Request {
 
@@ -118,25 +119,23 @@ open class GenesisClient : Request {
         http = HttpAsyncTask(configuration)
 
         try {
-            var paymentRequest: PaymentRequest? = null
+            var paymentRequest: PaymentRequest?
+
             response = when (genesisRequest) {
                 is ReconcileRequest -> http?.execute(configuration?.baseUrl, genesisRequest as? ReconcileRequest)?.get()
                 else -> {
                     paymentRequest = genesisRequest as? PaymentRequest
+
+                    if (paymentRequest?.consumerId.isNullOrBlank()) {
+                        val consumerId = retrieveConsumerIdFromGenesisGateway(paymentRequest?.getCustomerEmail())
+
+                        consumerId?.let { paymentRequest = paymentRequest?.setConsumerId(it) }
+                    }
+
                     http?.execute(configuration?.baseUrl, paymentRequest)?.get()
                 }
             }
 
-            // Retrieve and store consumer id
-            val result = this.transaction?.request
-            var consumerId = result?.transaction?.consumerId
-            when {
-                Response(this).isSuccess!!
-                        && consumerId.isNullOrEmpty()
-                        && !paymentRequest?.getCustomerEmail().isNullOrEmpty() -> {
-                    consumerId = retrieveConsumerIdFromGenesisGateway(paymentRequest?.getCustomerEmail())
-                }
-            }
         } catch (e: Exception) {
             GenesisError(ErrorCodes.SYSTEM_ERROR.code, e.message?: ErrorCodes.getErrorDescription(ErrorCodes.SYSTEM_ERROR.code?: 1))
         }
@@ -145,9 +144,19 @@ open class GenesisClient : Request {
     }
 
     private fun retrieveConsumerIdFromGenesisGateway(email: String?): String? {
-        http = HttpAsyncTask(configuration)
+        val httpClient = HttpAsyncTask(configuration)
 
         val retrieveConsumerRequest = RetrieveConsumerRequest(context, email)
+
+        val endpoint = configuration?.endpoint
+        val isWpfEnabled = configuration?.wpfEnabled
+        val isTokenEnabled = configuration?.tokenEnabled
+        val action = configuration?.action
+
+        configuration?.wpfEnabled = false
+        configuration?.tokenEnabled = false
+        configuration?.action = ""
+
         when (configuration?.endpoint) {
             Endpoints.EMERCHANTPAY -> {
                 configuration?.endpoint = Endpoints.RETRIEVE_CONSUMER_EMERCHANTPAY
@@ -155,12 +164,17 @@ open class GenesisClient : Request {
             Endpoints.ECOMPROCESSING -> {
                 configuration?.endpoint = Endpoints.RETRIEVE_CONSUMER_ECOMPROCESSING
             }
+            else -> {}
         }
-        configuration?.wpfEnabled = false
-        configuration?.tokenEnabled = false
-        configuration?.action = ""
-        response = http!!.execute(configuration?.baseUrl, retrieveConsumerRequest).get()
+
+        response = httpClient.execute(configuration?.baseUrl, retrieveConsumerRequest).get()
         val result = this.transaction?.request
+
+        configuration?.endpoint = endpoint!!
+        configuration?.wpfEnabled = isWpfEnabled
+        configuration?.tokenEnabled = isTokenEnabled
+        configuration?.action = action
+
         return result?.transaction?.consumerId
     }
 }

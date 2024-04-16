@@ -1,7 +1,5 @@
 package com.emerchantpay.gateway.genesisandroid.api.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.http.SslError
 import android.view.View
@@ -11,9 +9,8 @@ import android.webkit.WebViewClient
 import android.widget.ProgressBar
 
 import com.emerchantpay.gateway.genesisandroid.api.constants.ErrorMessages
-import com.emerchantpay.gateway.genesisandroid.api.constants.IntentExtras
-import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
 import com.emerchantpay.gateway.genesisandroid.api.models.GenesisError
+import com.emerchantpay.gateway.genesisandroid.api.util.WebViewUtil
 
 open class GenesisWebViewClient(// WebView Activity
         private val webViewActivity: GenesisWebViewActivity, // Progress Bar
@@ -26,27 +23,13 @@ open class GenesisWebViewClient(// WebView Activity
         progressBar.visibility = View.VISIBLE
 
         // Destroy webview activity
-        val returnIntent = Intent()
-        var resultCode: Int? = null
+        val result = WebViewUtil.getResultIntent(url)
+        val resultCode = result.first
+        val resultIntent = result.second
 
         when {
-            url.contains(URLConstants.FAILURE_ENDPOINT) -> {
-                returnIntent.putExtra(IntentExtras.EXTRA_RESULT, "failure")
-                resultCode = Activity.RESULT_OK
-            }
-            url.contains(URLConstants.CANCEL_ENDPOINT) -> {
-                returnIntent.putExtra("cancel", "cancel")
-                resultCode = Activity.RESULT_CANCELED
-            }
-            url.contains(URLConstants.SUCCESS_ENDPOINT) -> {
-                returnIntent.putExtra("success", "success")
-                resultCode = Activity.RESULT_OK
-            }
-        }
-
-        when {
-            resultCode != null -> {
-                resultCode?.let { webViewActivity.setResult(it, returnIntent) }
+            result.first != null -> {
+                resultCode?.let { webViewActivity.setResult(it, resultIntent) }
                 stopLoading()
             }
         }

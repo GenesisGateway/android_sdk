@@ -18,7 +18,7 @@ class ConfigurationUnitTest {
     internal var language = Locales.EN
 
     internal var environment = Environments("staging.gate")
-    internal var endpoint = Endpoints("emerchantpay.net")
+    internal var endpoint = Endpoints.EMERCHANTPAY
 
     internal var configuration = Configuration(username, password, environment, endpoint, language)
 

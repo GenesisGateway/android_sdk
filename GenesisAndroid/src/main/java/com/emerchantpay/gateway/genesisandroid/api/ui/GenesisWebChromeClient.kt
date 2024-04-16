@@ -1,15 +1,13 @@
 package com.emerchantpay.gateway.genesisandroid.api.ui
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Message
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.ProgressBar
-import com.emerchantpay.gateway.genesisandroid.api.constants.IntentExtras
 
-import com.emerchantpay.gateway.genesisandroid.api.constants.URLConstants
+import com.emerchantpay.gateway.genesisandroid.api.util.WebViewUtil
 
 open class GenesisWebChromeClient(// WebView Activity
         private val webViewActivity: GenesisWebViewActivity, // Progress Bar
@@ -27,23 +25,8 @@ open class GenesisWebChromeClient(// WebView Activity
 
         val url = view.url
 
-        val returnIntent = Intent()
-        var resultCode: Int? = null
-
-        when {
-            url?.contains(URLConstants.FAILURE_ENDPOINT) == true -> {
-                returnIntent.putExtra(IntentExtras.EXTRA_RESULT, "failure")
-                resultCode = Activity.RESULT_OK
-            }
-            url?.contains(URLConstants.CANCEL_ENDPOINT) == true -> {
-                returnIntent.putExtra("cancel", "cancel")
-                resultCode = Activity.RESULT_CANCELED
-            }
-            url?.contains(URLConstants.SUCCESS_ENDPOINT) == true -> {
-                returnIntent.putExtra("success", "success")
-                resultCode = Activity.RESULT_OK
-            }
-        }
+        val result = url?.let { WebViewUtil.getResultIntent(it) }
+        val resultCode = result?.first
 
         when {
             resultCode != null -> {
